@@ -19,5 +19,4 @@ class KiwiSdrWaterfallStream extends KiwiSdrStream {
     setWfSpeed(1);
     setWfInterp(13);
   }
-  
 }

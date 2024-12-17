@@ -279,6 +279,10 @@ abstract class KiwiSdrStream {
     sendMessage('SET interp=$interp');
   }
 
+  void setWindowFunc(int windowFunc) {
+    sendMessage('SET window_func=$windowFunc');
+  }
+
   void setAuth(String token) {
     sendMessage('SET auth t=kiwi p=$token');
   }
