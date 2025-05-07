@@ -40,7 +40,7 @@ class KiwiSdrSoundStream extends KiwiSdrStream {
 
   @override
   void setupRxParams() {
-    setMode(SdrMode.am, -4900, 4900, 612.0);
+    setMode(Modulation.am, -4900, 4900, 612.0);
     setAgc(1, 0, -100, 6, 1000, 50);
   }
 

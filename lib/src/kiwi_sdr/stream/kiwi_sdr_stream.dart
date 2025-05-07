@@ -16,7 +16,7 @@ abstract class KiwiSdrStream {
 
   //double _centerFrequency = 15e5;
   double _maxFrequency = 30e5;
-  SdrMode _mode = SdrMode.am;
+  Modulation _mode = Modulation.am;
   double? _sampleRate;
   int? _numChannels;
   int? _lowCut;
@@ -24,7 +24,7 @@ abstract class KiwiSdrStream {
   double? _frequency;
   double? _frequencyOffset;
 
-  SdrMode get mode => _mode;
+  Modulation get mode => _mode;
 
   double get sampleRate => _sampleRate!;
 
@@ -170,7 +170,7 @@ abstract class KiwiSdrStream {
   void setFrequency(double freq) {
     _frequency = freq;
 
-    if ([SdrMode.am, SdrMode.amn, SdrMode.amw].contains(_mode)) {
+    if ([Modulation.am, Modulation.amn, Modulation.amw].contains(_mode)) {
       if (_highCut != null) {
         _lowCut = -_highCut!;
       }
@@ -182,7 +182,7 @@ abstract class KiwiSdrStream {
     setMode(_mode, _lowCut, _highCut, freq);
   }
 
-  void setMode(SdrMode mode, int? lc, int? hc, double freq) {
+  void setMode(Modulation mode, int? lc, int? hc, double freq) {
     _mode = mode;
     
     if (lc != null) {

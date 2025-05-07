@@ -13,8 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-part 'src/sdr_connection.dart';
-part 'src/sdr_mode.dart';
+part 'src/utilities/modulation.dart';
 part 'src/kiwi_sdr/kiwi_sdr_connection.dart';
 part 'src/kiwi_sdr/stream/kiwi_sdr_stream.dart';
 part 'src/kiwi_sdr/stream/kiwi_sdr_sound_stream.dart';

@@ -1,6 +1,6 @@
 part of 'package:flutter_sdr/flutter_sdr.dart';
 
-class KiwiSdrConnection extends SdrConnection {
+class KiwiSdrConnection {
   final KiwiSdrSoundStream _soundStream;
   final KiwiSdrWaterfallStream _waterfallStream;
   final KiwiSdrExtensionStream _extensionStream;
@@ -56,17 +56,14 @@ class KiwiSdrConnection extends SdrConnection {
     );
   }
 
-  @override
   void start() {
     _soundStream.start();
   }
 
-  @override
   void stop() {
     _soundStream.stop();
   }
 
-  @override
   void close() {
     _soundStream.close();
     _waterfallStream.close();
