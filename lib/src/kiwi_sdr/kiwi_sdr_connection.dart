@@ -40,7 +40,7 @@ class KiwiSdrConnection {
     final waterfallStream = KiwiSdrWaterfallStream(
       versionMajor: maj,
       versionMinor: min,
-      uri: Uri.parse('$wsUrl/ws/kiwi/$ts/F')
+      uri: Uri.parse('$wsUrl/ws/kiwi/$ts/W/F')
     );
 
     final extensionStream = KiwiSdrExtensionStream(

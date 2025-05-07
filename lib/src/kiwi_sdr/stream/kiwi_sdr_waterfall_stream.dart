@@ -12,7 +12,7 @@ class KiwiSdrWaterfallStream extends KiwiSdrStream {
     required super.uri,
   }) {
     setAuth('#');
-    setCompression(true);
+    setupRxParams();
   }
 
   @override

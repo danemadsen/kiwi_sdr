@@ -47,6 +47,7 @@ abstract class KiwiSdrStream {
     _versionMinor = versionMinor 
   {
     _socket.stream.listen(_onChannelData);
+    sendMessage('SET options=1');
 
     Timer.periodic(
       const Duration(seconds: 5), 
@@ -61,6 +62,10 @@ abstract class KiwiSdrStream {
     if (tag == 'MSG') {
       final message = String.fromCharCodes(value);
       _parseMessage(message);
+      if (this is KiwiSdrWaterfallStream) {
+        print('KiwiSdrWaterfallStream: $message');
+
+      }
     }
     else {
       onData(tag, value);
