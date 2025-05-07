@@ -159,13 +159,9 @@ abstract class KiwiSdrStream {
     _streamController.sink.close();
   }
 
-  void sendMessage(String message) {
-    _socket.sink.add(message);
-  }
+  void sendMessage(String message) => _socket.sink.add(message);
 
-  void setKeepAlive() {
-    sendMessage('SET keepalive');
-  }
+  void setKeepAlive() => sendMessage('SET keepalive');
 
   void setFrequency(double freq) {
     _frequency = freq;
@@ -211,17 +207,18 @@ abstract class KiwiSdrStream {
 
   void setupRxParams();
 
-  void setAgc(int on, int hang, int threshold, int slope, int decay, int gain) {
-    sendMessage('SET agc=$on hang=$hang thresh=$threshold slope=$slope decay=$decay manGain=$gain');
-  }
+  void setAgc(
+    int on, 
+    int hang, 
+    int threshold, 
+    int slope, 
+    int decay, 
+    int gain
+  ) => sendMessage('SET agc=$on hang=$hang thresh=$threshold slope=$slope decay=$decay manGain=$gain');
 
-  void setSquelch(int squelch, int threshold) {
-    sendMessage('SET squelch=$squelch max=$threshold');
-  }
+  void setSquelch(int squelch, int threshold) => sendMessage('SET squelch=$squelch max=$threshold');
 
-  void setArOk(int inRate, int outRate) {
-    sendMessage('SET AR OK in=$inRate out=$outRate');
-  }
+  void setArOk(int inRate, int outRate) => sendMessage('SET AR OK in=$inRate out=$outRate');
 
   void setGen(int freq, int attn) {
     sendMessage('SET genattn=$attn');
@@ -247,13 +244,9 @@ abstract class KiwiSdrStream {
     return _maxFrequency / pow(2, zoom);
   }
 
-  int startFrequencyToCounter(double startFrequency) {
-    return (startFrequency / _maxFrequency * pow(2, _maxZoom) * _wfBins).round();
-  }
+  int startFrequencyToCounter(double startFrequency) => (startFrequency / _maxFrequency * pow(2, _maxZoom) * _wfBins).round();
 
-  void setMaxDbMinDb(int maxDb, int minDb) {
-    sendMessage('SET maxdb=$maxDb mindb=$minDb');
-  }
+  void setMaxDbMinDb(int maxDb, int minDb) => sendMessage('SET maxdb=$maxDb mindb=$minDb');
 
   void setWfSpeed(int speed) {
     speed = max(1, min(4, speed)); // clamp to 1-4
@@ -273,21 +266,13 @@ abstract class KiwiSdrStream {
     sendMessage('SET interp=$interp');
   }
 
-  void setWindowFunc(int windowFunc) {
-    sendMessage('SET window_func=$windowFunc');
-  }
+  void setWindowFunc(int windowFunc) => sendMessage('SET window_func=$windowFunc');
 
-  void setAuth(String token) {
-    sendMessage('SET auth t=kiwi p=$token');
-  }
+  void setAuth(String token) => sendMessage('SET auth t=kiwi p=$token');
 
-  void setName(String name) {
-    sendMessage('SET ident_user=$name');
-  }
+  void setName(String name) => sendMessage('SET ident_user=$name');
 
-  void setGeo(String geo) {
-    sendMessage('SET geo=$geo');
-  }
+  void setGeo(String geo) => sendMessage('SET geo=$geo');
 
   void setCompression(bool enabled);
 

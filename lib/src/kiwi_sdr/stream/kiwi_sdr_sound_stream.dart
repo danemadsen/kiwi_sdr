@@ -34,9 +34,7 @@ class KiwiSdrSoundStream extends KiwiSdrStream {
   }
 
   @override
-  void setCompression(bool enabled) {
-    sendMessage('SET compression=${enabled ? 1 : 0}');
-  }
+  void setCompression(bool enabled) => sendMessage('SET compression=${enabled ? 1 : 0}');
 
   @override
   void setupRxParams() {
@@ -44,11 +42,7 @@ class KiwiSdrSoundStream extends KiwiSdrStream {
     setAgc(1, 0, -100, 6, 1000, 50);
   }
 
-  void start() {
-    _playing = true;
-  }
+  void start() => _playing = true;
 
-  void stop() {
-    _playing = false;
-  }
+  void stop() => _playing = false;
 }
