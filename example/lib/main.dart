@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sdr/flutter_sdr.dart';
 
-void main() {
+void main() async {
+  final connection = await KiwiSdrConnection.connect('http://22274.proxy.kiwisdr.com:8073/');
+
+  connection.start();
+
   runApp(const MyApp());
 }
 
