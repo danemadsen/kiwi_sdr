@@ -5,7 +5,6 @@ abstract class KiwiSdrStream {
   static const int _wfBins = 1024;
 
   final WebSocketChannel _socket;
-  final StreamController<Uint8List> _streamController = StreamController<Uint8List>.broadcast();
 
   int _versionMajor;
   int _versionMinor;
@@ -38,8 +37,6 @@ abstract class KiwiSdrStream {
 
   double get frequency => _frequency!;
 
-  Stream<Uint8List> get stream => _streamController.stream;
-
   KiwiSdrStream({
     required int versionMajor, 
     required int versionMinor, 
@@ -61,18 +58,16 @@ abstract class KiwiSdrStream {
     final tag = String.fromCharCodes(data.sublist(0, 3));
     final Uint8List value = data.sublist(3);
 
-    switch (tag) {
-      case 'SND':
-        _streamController.sink.add(value);
-        break;
-      case 'MSG':
-        final message = String.fromCharCodes(value);
-        _parseMessage(message);
-        break;
-      default:
-        developer.log('Unknown tag: $tag');
+    if (tag == 'MSG') {
+      final message = String.fromCharCodes(value);
+      _parseMessage(message);
+    }
+    else {
+      onData(tag, value);
     }
   }
+
+  void onData(String tag, Uint8List data);
   
   void _parseMessage(String message) {
     for (final property in message.split(' ')) {
@@ -156,7 +151,6 @@ abstract class KiwiSdrStream {
   void close() {
     _keepAlive = false;
     _socket.sink.close();
-    _streamController.sink.close();
   }
 
   void sendMessage(String message) => _socket.sink.add(message);

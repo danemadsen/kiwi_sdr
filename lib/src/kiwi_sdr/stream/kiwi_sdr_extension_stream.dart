@@ -16,4 +16,9 @@ class KiwiSdrExtensionStream extends KiwiSdrStream {
   void setupRxParams() {
     throw UnimplementedError();
   }
+  
+  @override
+  void onData(String tag, Uint8List data) {
+    throw UnimplementedError();
+  }
 }

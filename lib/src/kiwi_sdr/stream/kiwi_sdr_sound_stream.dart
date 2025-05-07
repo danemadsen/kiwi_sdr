@@ -15,11 +15,12 @@ class KiwiSdrSoundStream extends KiwiSdrStream {
     setNoiseBlanker(100, 50);
     sendMessage('SET de_emp=0 nfm=1');
     sendMessage('SET little-endian');
-
-    stream.listen(_onSoundData);
   }
 
-  void _onSoundData(Uint8List data) {
+  @override
+  void onData(String tag, Uint8List data) {
+    if (tag != 'SND') developer.log('KiwiSdrSoundStream: $tag');
+
     if (!_playing || !configLoaded) return;
 
     Uint8List adpcmBytes = data.sublist(7);
