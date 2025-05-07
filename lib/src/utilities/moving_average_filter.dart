@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class MovingAverageFilter {
   final int windowSize;

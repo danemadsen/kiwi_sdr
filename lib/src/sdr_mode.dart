@@ -1,3 +1,5 @@
+part of 'package:flutter_sdr/flutter_sdr.dart';
+
 enum SdrMode {
   am,
   amn,

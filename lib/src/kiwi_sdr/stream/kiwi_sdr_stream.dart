@@ -1,10 +1,4 @@
-import 'dart:async';
-import 'dart:math';
-import 'dart:typed_data';
-import 'dart:developer' as developer;
-
-import '../../sdr_mode.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+part of 'package:flutter_sdr/flutter_sdr.dart';
 
 abstract class KiwiSdrStream {
   static const int _maxZoom = 14;

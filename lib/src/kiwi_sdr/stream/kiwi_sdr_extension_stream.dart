@@ -1,4 +1,4 @@
-import 'kiwi_sdr_stream.dart';
+part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class KiwiSdrExtensionStream extends KiwiSdrStream {
   KiwiSdrExtensionStream({

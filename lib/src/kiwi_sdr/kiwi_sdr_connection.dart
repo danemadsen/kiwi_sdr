@@ -1,11 +1,4 @@
-import 'dart:async';
-
-import 'stream/kiwi_sdr_extension_stream.dart';
-import 'stream/kiwi_sdr_sound_stream.dart';
-import 'stream/kiwi_sdr_waterfall_stream.dart';
-import '../sdr_connection.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class KiwiSdrConnection extends SdrConnection {
   final KiwiSdrSoundStream _soundStream;

@@ -1,10 +1,4 @@
-import 'dart:typed_data';
-
-import '../../utilities/ima_adpcm_decoder.dart';
-import '../../utilities/moving_average_filter.dart';
-import '../../sdr_mode.dart';
-import '../../utilities/pcm.dart';
-import 'kiwi_sdr_stream.dart';
+part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class KiwiSdrSoundStream extends KiwiSdrStream {
   final ImaAdpcmDecoder _decoder = ImaAdpcmDecoder();
