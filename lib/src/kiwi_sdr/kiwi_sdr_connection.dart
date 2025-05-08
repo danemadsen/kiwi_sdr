@@ -58,9 +58,6 @@ class KiwiSdrConnection {
 
   void start() {
     _soundStream.start();
-    _waterfallStream.stream.listen((data) {
-      print('Waterfall data: ${data.length}');
-    });
   }
 
   void stop() {
@@ -72,4 +69,6 @@ class KiwiSdrConnection {
     _waterfallStream.close();
     _extensionStream.close();
   }
+
+  Stream<Uint8List> get waterfallStream => _waterfallStream.stream;
 }

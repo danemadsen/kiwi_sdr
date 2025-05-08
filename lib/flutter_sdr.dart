@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
@@ -22,3 +23,4 @@ part 'src/kiwi_sdr/stream/kiwi_sdr_extension_stream.dart';
 part 'src/utilities/moving_average_filter.dart';
 part 'src/utilities/ima_adpcm_decoder.dart';
 part 'src/utilities/pcm.dart';
+part 'src/waterfall_painter.dart';
