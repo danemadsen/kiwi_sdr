@@ -53,7 +53,15 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
   @override
   void initState() {
     super.initState();
+    initilizeBuffer();
     establishConnection();
+  }
+
+  void initilizeBuffer() {
+    // Buffer should have 2040 rows and 2040 columns
+    for (int i = 0; i < 2040; i++) {
+      _samplesBuffer.add(Uint8List(2040));
+    }
   }
 
   Future<void> establishConnection() async {
@@ -63,6 +71,9 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
       print(samples.sublist(0, 10));
       setState(() {
         _samplesBuffer.insert(0, samples);
+        if (_samplesBuffer.length > 2040) {
+          _samplesBuffer.removeLast();
+        }
       });
     });
   }
@@ -70,7 +81,7 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: WaterfallPainter(samplesList: _samplesBuffer),
+      painter: WaterfallPainter(samplesList: List<Uint8List>.from(_samplesBuffer)),
       size: Size.infinite,
     );
   }

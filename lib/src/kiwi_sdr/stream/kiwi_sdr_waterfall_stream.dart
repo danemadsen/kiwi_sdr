@@ -1,7 +1,6 @@
 part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class KiwiSdrWaterfallStream extends KiwiSdrStream {
-  final ImaAdpcmDecoder _decoder = ImaAdpcmDecoder();
   final StreamController<Uint8List> _controller = StreamController<Uint8List>.broadcast();
 
   Stream<Uint8List> get stream => _controller.stream;
@@ -21,17 +20,10 @@ class KiwiSdrWaterfallStream extends KiwiSdrStream {
     if (!configLoaded) return;
 
     // Skip header (12 bytes)
-    Uint8List compressedData = data.sublist(12);
-    Int16List decodedSamples = _decoder.decode(compressedData);
-
-    // Remove decompression tail
-    decodedSamples = decodedSamples.sublist(0, decodedSamples.length - 10);
-
-    // Normalize to Uint8List
-    Uint8List normalized = normalizeInt16ToUint8(decodedSamples);
+    final waterfallData = data.sublist(12);
 
     // Send normalized data instead
-    _controller.sink.add(normalized);
+    _controller.sink.add(waterfallData);
   }
 
   Uint8List normalizeInt16ToUint8(Int16List input) {
@@ -55,7 +47,7 @@ class KiwiSdrWaterfallStream extends KiwiSdrStream {
   void setupRxParams() {
     setZoomCf(0, 0);
     setMaxDbMinDb(-10, -110);
-    setWfSpeed(1);
+    setWfSpeed(4);
     setWfInterp(13);
   }
 
