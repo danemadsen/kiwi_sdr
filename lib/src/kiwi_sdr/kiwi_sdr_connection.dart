@@ -46,14 +46,6 @@ class KiwiSdrConnection {
     );
   }
 
-  void start() {
-    _soundStream.start();
-  }
-
-  void stop() {
-    _soundStream.stop();
-  }
-
   void close() {
     _soundStream.close();
     _waterfallStream.close();

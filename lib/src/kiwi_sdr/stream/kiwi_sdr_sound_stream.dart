@@ -3,7 +3,6 @@ part of 'package:flutter_sdr/flutter_sdr.dart';
 class KiwiSdrSoundStream extends KiwiSdrStream {
   final ImaAdpcmDecoder _decoder = ImaAdpcmDecoder();
   final MovingAverageFilter _movingAverageFilter = MovingAverageFilter(5);
-  bool _playing = true;
   
   KiwiSdrSoundStream({
     required super.versionMajor, 
@@ -21,7 +20,7 @@ class KiwiSdrSoundStream extends KiwiSdrStream {
   void onData(String tag, Uint8List data) {
     if (tag != 'SND') developer.log('KiwiSdrSoundStream: $tag');
 
-    if (!_playing || !configLoaded) return;
+    if (!configLoaded) return;
 
     Uint8List adpcmBytes = data.sublist(7);
     Int16List pcmSamples = _decoder.decode(adpcmBytes);
@@ -42,8 +41,4 @@ class KiwiSdrSoundStream extends KiwiSdrStream {
     setMode(Modulation.am, -4900, 4900, 612.0);
     setAgc(1, 0, -100, 6, 1000, 50);
   }
-
-  void start() => _playing = true;
-
-  void stop() => _playing = false;
 }
