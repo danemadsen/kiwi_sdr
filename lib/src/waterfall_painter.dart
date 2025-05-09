@@ -14,44 +14,74 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   final List<Float32List> samplesList = [];
   int maxSamples = 512;
 
+  int binCount = 0;
+  double pixelSize = 1.0;
+
+  ui.Image? _imageBuffer;
+  Size _lastSize = Size.zero;
+
   WaterfallPainter({required KiwiSdrConnection connection}) {
     connection._waterfallStream.stream.listen((samples) {
       samplesList.insert(0, samples);
 
-      if (samplesList.length >= maxSamples) {
+      if (_lastSize != Size.zero) {
+        _updateImageBuffer(_lastSize);
+      }
+
+      if (samplesList.length > maxSamples) {
         samplesList.removeRange(maxSamples, samplesList.length);
       }
 
-      notifyListeners();
+      notifyListeners(); // triggers CustomPaint to repaint
     });
+  }
+
+  void _updateImageBuffer(Size size) async {
+    if (samplesList.isEmpty) return;
+
+    final width = size.width;
+    final height = size.height;
+    _lastSize = size;
+
+    binCount = samplesList[0].length;
+    pixelSize = width / binCount;
+    maxSamples = height ~/ pixelSize;
+
+    // Shift previous image content up
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Draw existing image if present
+    if (_imageBuffer != null) {
+      final src = Rect.fromLTWH(0, 0, width, height - pixelSize);
+      final dst = Rect.fromLTWH(0, pixelSize, width, height - pixelSize);
+      canvas.drawImageRect(_imageBuffer!, src, dst, Paint());
+    }
+
+    // Draw new samples row at the bottom
+    final samples = samplesList.first;
+    for (int x = 0; x < binCount; x++) {
+      final color = _getWaterfallColor(samples[x]);
+      final paint = Paint()..color = color;
+
+      canvas.drawRect(
+        Rect.fromLTWH(x * pixelSize, 0, pixelSize, pixelSize),
+        paint,
+      );
+    }
+
+    final picture = recorder.endRecording();
+    _imageBuffer = await picture.toImage(width.toInt(), height.toInt());
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (samplesList.isEmpty) return;
-
-    final binCount = samplesList[0].length;
-    final pixelSize = size.width / binCount;
-    maxSamples = size.height ~/ pixelSize;
-
-    for (int y = 0; y < samplesList.length; y++) {
-      final samples = samplesList[y];
-
-      for (int x = 0; x < binCount; x++) {
-        final color = _getWaterfallColor(samples[x]);
-        final paint = Paint()..color = color;
-
-        canvas.drawRect(
-          Rect.fromLTWH(
-            x * pixelSize,
-            y * pixelSize,
-            pixelSize,
-            pixelSize,
-          ),
-          paint,
-        );
-      }
+    if (_imageBuffer == null || _lastSize != size) {
+      _updateImageBuffer(size);
+      return;
     }
+
+    canvas.drawImage(_imageBuffer!, Offset.zero, Paint());
   }
 
   Color _getWaterfallColor(double value) {
@@ -67,16 +97,14 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant WaterfallPainter oldDelegate) =>
-      oldDelegate.samplesList != samplesList;
-      
+  bool shouldRepaint(covariant WaterfallPainter oldDelegate) => true;
+
   @override
   bool? hitTest(Offset position) => null;
-      
+
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
-      
-  @override
-  bool shouldRebuildSemantics(covariant WaterfallPainter oldDelegate) => shouldRepaint(oldDelegate);
-}
 
+  @override
+  bool shouldRebuildSemantics(covariant WaterfallPainter oldDelegate) => false;
+}
