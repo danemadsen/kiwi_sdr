@@ -2,13 +2,14 @@ part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   final List<Float32List> samplesList = [];
+  int maxSamples = 512;
 
   WaterfallPainter({required KiwiSdrConnection connection}) {
     connection._waterfallStream.stream.listen((samples) {
       samplesList.insert(0, samples);
 
-      if (samplesList.length >= 2040) {
-        samplesList.removeLast();
+      if (samplesList.length >= maxSamples) {
+        samplesList.removeRange(maxSamples, samplesList.length);
       }
 
       notifyListeners();
@@ -31,6 +32,7 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
 
     final binCount = samplesList[0].length;
     final pixelSize = size.width / binCount;
+    maxSamples = size.height ~/ pixelSize;
 
     for (int y = 0; y < samplesList.length; y++) {
       final samples = samplesList[y];
