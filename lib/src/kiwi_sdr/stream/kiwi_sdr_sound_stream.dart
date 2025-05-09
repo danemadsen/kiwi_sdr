@@ -23,13 +23,11 @@ class KiwiSdrSoundStream extends KiwiSdrStream {
     if (!configLoaded) return;
 
     Uint8List adpcmBytes = data.sublist(7);
-    Int16List pcmSamples = _decoder.decode(adpcmBytes);
-
-    // Convert Int16List to Uint8List
-    Uint8List pcmData = pcmSamples.buffer.asUint8List();
+    
+    Uint8List pcmSamples = _decoder.decode(adpcmBytes);
 
     // Create WAV file bytes
-    final bytes = _createWavFile(pcmData, sampleRate, 1, 16);
+    final bytes = _createWavFile(pcmSamples, sampleRate, 1, 16);
   
     final audioPlayer = AudioPlayer();
 

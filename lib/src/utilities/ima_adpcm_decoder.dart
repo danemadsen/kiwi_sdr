@@ -30,7 +30,7 @@ class ImaAdpcmDecoder {
     return sample;
   }
 
-  Int16List decode(Uint8List data) {
+  Uint8List decode(Uint8List data) {
     List<int> samples = [];
     for (final byte in data) {
       int sample0 = _decodeSample(byte & 0x0F);
@@ -38,6 +38,6 @@ class ImaAdpcmDecoder {
       samples.add(sample0);
       samples.add(sample1);
     }
-    return Int16List.fromList(samples);
+    return Int16List.fromList(samples).buffer.asUint8List();
   }
 }
