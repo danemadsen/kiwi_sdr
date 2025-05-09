@@ -19,8 +19,8 @@ class KiwiSdrWaterfallStream extends KiwiSdrStream {
     if (tag != 'W/F') developer.log('KiwiSdrWaterfallStream: $tag');
     if (!configLoaded) return;
 
-    // Skip header (12 bytes)
-    final waterfallData = data.sublist(12);
+    // Skip header (14 bytes)
+    final waterfallData = data.sublist(14);
 
     // Send normalized data instead
     _controller.sink.add(waterfallData);

@@ -17,18 +17,23 @@ class WaterfallPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (samplesList.isEmpty) return;
-
+  
     final binCount = samplesList[0].length;
     final binWidth = size.width / binCount;
     final lineHeight = size.height / samplesList.length;
-
+  
     for (int y = 0; y < samplesList.length; y++) {
       final samples = samplesList[y];
+      final min = samples.reduce((a, b) => a < b ? a : b);
+      final max = samples.reduce((a, b) => a > b ? a : b);
+      final range = (max - min).toDouble().clamp(1.0, double.infinity); // Avoid div by 0
+  
       for (int x = 0; x < binCount; x++) {
-        final intensity = samples[x] / 255.0;
+        final normalized = (samples[x] - min) / range;
+        final intensity = normalized.clamp(0.0, 1.0);
         final color = _getWaterfallColor(intensity);
         final paint = Paint()..color = color;
-
+  
         canvas.drawRect(
           Rect.fromLTWH(
               x * binWidth,
