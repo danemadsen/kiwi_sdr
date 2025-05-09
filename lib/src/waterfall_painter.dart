@@ -1,9 +1,19 @@
 part of 'package:flutter_sdr/flutter_sdr.dart';
 
-class WaterfallPainter extends CustomPainter {
-  final List<Float32List> samplesList;
+class WaterfallPainter extends ChangeNotifier implements CustomPainter {
+  final List<Float32List> samplesList = [];
 
-  WaterfallPainter({required this.samplesList});
+  WaterfallPainter({required KiwiSdrConnection connection}) {
+    connection._waterfallStream.stream.listen((samples) {
+      samplesList.insert(0, samples);
+
+      if (samplesList.length >= 2040) {
+        samplesList.removeLast();
+      }
+      
+      notifyListeners();
+    });
+  }
 
   static const List<Color> waterfallColors = [
     Colors.black,
@@ -57,5 +67,14 @@ class WaterfallPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant WaterfallPainter oldDelegate) =>
       oldDelegate.samplesList != samplesList;
+      
+  @override
+  bool? hitTest(Offset position) => null;
+      
+  @override
+  SemanticsBuilderCallback? get semanticsBuilder => null;
+      
+  @override
+  bool shouldRebuildSemantics(covariant WaterfallPainter oldDelegate) => shouldRepaint(oldDelegate);
 }
 

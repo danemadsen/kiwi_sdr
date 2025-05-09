@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_sdr/flutter_sdr.dart';
 
@@ -32,47 +30,34 @@ class WaterfallWidget extends StatefulWidget {
 }
 
 class _WaterfallWidgetState extends State<WaterfallWidget> {
-  final List<Float32List> _samplesBuffer = [];
-  late KiwiSdrConnection _connection;
-  int min = 255;
-  int max = 0;
+  KiwiSdrConnection? _connection;
 
   @override
   void initState() {
     super.initState();
-    initilizeBuffer();
     establishConnection();
-  }
-
-  void initilizeBuffer() {
-    // Buffer should have 2040 rows and 2040 columns
-    for (int i = 0; i < 2040; i++) {
-      _samplesBuffer.add(Float32List(2040));
-    }
   }
 
   Future<void> establishConnection() async {
     _connection = await KiwiSdrConnection.connect('http://22274.proxy.kiwisdr.com:8073/');
-    _connection.start();
-    _connection.waterfallStream.listen((samples) => setState(() {
-      _samplesBuffer.insert(0, samples);
-      if (_samplesBuffer.length > 2040) {
-        _samplesBuffer.removeLast();
-      }
-    }));
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_connection == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return CustomPaint(
-      painter: WaterfallPainter(samplesList: List<Float32List>.from(_samplesBuffer)),
+      painter: WaterfallPainter(connection: _connection!),
       size: Size.infinite,
     );
   }
 
   @override
   void dispose() {
-    _connection.close();
+    _connection!.close();
     super.dispose();
   }
 }
