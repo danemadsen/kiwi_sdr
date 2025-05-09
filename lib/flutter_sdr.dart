@@ -13,6 +13,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 part 'src/utilities/modulation.dart';
 part 'src/kiwi_sdr/kiwi_sdr_connection.dart';
+part 'src/kiwi_sdr/kiwi_sdr_exception.dart';
 part 'src/kiwi_sdr/stream/kiwi_sdr_stream.dart';
 part 'src/kiwi_sdr/stream/kiwi_sdr_sound_stream.dart';
 part 'src/kiwi_sdr/stream/kiwi_sdr_waterfall_stream.dart';

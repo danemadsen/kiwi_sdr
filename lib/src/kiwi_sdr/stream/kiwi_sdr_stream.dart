@@ -124,23 +124,23 @@ abstract class KiwiSdrStream {
         configLoaded = true;
         break;
       case 'too_busy':
-        throw Exception('KiwiSDR too busy. All $value client slots are in use.');
+        throw KiwiSdrException('KiwiSDR too busy. All $value client slots are in use.');
       case 'redirect':
-        throw Exception('KiwiSDR redirect to ${Uri.decodeComponent(value)}');
+        throw KiwiSdrException('KiwiSDR redirect to ${Uri.decodeComponent(value)}');
       case 'badp':
         switch (value) {
           case '0':
             break;
           case '1':
-            throw Exception('KiwiSDR bad password');
+            throw KiwiSdrException('KiwiSDR bad password');
           case '5':
-            throw Exception('KiwiSDR multiple connections from the same IP address');
+            throw KiwiSdrException('KiwiSDR multiple connections from the same IP address');
           default:
-            throw Exception('KiwiSDR password error: $value');
+            throw KiwiSdrException('KiwiSDR password error: $value');
         }
         break;
       case 'down':
-        throw Exception('KiwiSDR is down');
+        throw KiwiSdrException('KiwiSDR is down');
     }
   }
 
@@ -237,7 +237,7 @@ abstract class KiwiSdrStream {
 
   double zoomToSpan(int zoom) {
     if (zoom <= 0 || zoom > _maxZoom) {
-      throw Exception('Invalid zoom level: $zoom');
+      throw KiwiSdrException('Invalid zoom level: $zoom');
     }
 
     return _maxFrequency / pow(2, zoom);
@@ -259,7 +259,7 @@ abstract class KiwiSdrStream {
     }
 
     if ((interp < 0 || interp > 4) && (interp < 10 || interp > 14)) {
-      throw Exception('Invalid interp value: $interp');
+      throw KiwiSdrException('Invalid interp value: $interp');
     }
 
     sendMessage('SET interp=$interp');

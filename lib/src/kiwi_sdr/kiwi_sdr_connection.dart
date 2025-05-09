@@ -23,7 +23,7 @@ class KiwiSdrConnection {
       ts = versionData['ts'];
     } 
     else {
-      throw Exception('Failed get KiwiSDR version');
+      throw KiwiSdrException('Failed get KiwiSDR version');
     }
 
     final wsUrl = url.replaceAll(RegExp(r'https?'), 'ws');

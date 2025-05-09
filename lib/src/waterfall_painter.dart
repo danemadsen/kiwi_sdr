@@ -1,5 +1,15 @@
 part of 'package:flutter_sdr/flutter_sdr.dart';
 
+const List<Color> _waterfallColors = [
+  Colors.black,
+  Colors.blue,
+  Colors.cyan,
+  Colors.green,
+  Colors.yellow,
+  Colors.orange,
+  Colors.red,
+];
+
 class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   final List<Float32List> samplesList = [];
   int maxSamples = 512;
@@ -15,16 +25,6 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
       notifyListeners();
     });
   }
-
-  static const List<Color> waterfallColors = [
-    Colors.black,
-    Colors.blue,
-    Colors.cyan,
-    Colors.green,
-    Colors.yellow,
-    Colors.orange,
-    Colors.red,
-  ];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -55,12 +55,12 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   }
 
   Color _getWaterfallColor(double value) {
-    final step = 1 / (waterfallColors.length - 1);
+    final step = 1 / (_waterfallColors.length - 1);
     final idx = (value / step).floor();
-    if (idx >= waterfallColors.length - 1) return waterfallColors.last;
+    if (idx >= _waterfallColors.length - 1) return _waterfallColors.last;
 
-    final startColor = waterfallColors[idx];
-    final endColor = waterfallColors[idx + 1];
+    final startColor = _waterfallColors[idx];
+    final endColor = _waterfallColors[idx + 1];
     final localValue = (value - (step * idx)) / step;
 
     return Color.lerp(startColor, endColor, localValue)!;
