@@ -15,7 +15,7 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   int maxSamples = 512;
 
   WaterfallPainter({required KiwiSdrConnection connection}) {
-    connection._waterfallStream.stream.listen((samples) {
+    connection.waterfallStream.listen((samples) {
       samplesList.insert(0, samples);
 
       if (samplesList.length >= maxSamples) {

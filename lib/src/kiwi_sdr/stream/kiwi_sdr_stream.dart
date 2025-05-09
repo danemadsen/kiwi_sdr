@@ -4,6 +4,7 @@ abstract class KiwiSdrStream {
   static const int _maxZoom = 14;
   static const int _wfBins = 1024;
 
+  final SendPort _sendPort;
   final WebSocketChannel _socket;
 
   int _versionMajor;
@@ -37,42 +38,47 @@ abstract class KiwiSdrStream {
 
   double get frequency => _frequency!;
 
+  String get tag;
+
   KiwiSdrStream({
     required int versionMajor, 
     required int versionMinor, 
-    required Uri uri
+    required Uri uri,
+    required SendPort sendPort
   }) : 
     _socket = WebSocketChannel.connect(uri), 
     _versionMajor = versionMajor, 
-    _versionMinor = versionMinor 
-  {
-    _socket.stream.listen(_onChannelData);
+    _versionMinor = versionMinor,
+    _sendPort = sendPort;
+
+  Future<void> run() async {
     sendMessage('SET options=1');
 
     Timer.periodic(
       const Duration(seconds: 5), 
       _keepAliveTimer
     );
+
+    await for (final data in _socket.stream) {
+      _onChannelData(data);
+    }
   }
 
   void _onChannelData(dynamic data) {
-    final tag = String.fromCharCodes(data.sublist(0, 3));
+    final dataTag = String.fromCharCodes(data.sublist(0, 3));
     final Uint8List value = data.sublist(3);
 
-    if (tag == 'MSG') {
+    if (dataTag == 'MSG') {
       final message = String.fromCharCodes(value);
       _parseMessage(message);
-      if (this is KiwiSdrWaterfallStream) {
-        print('KiwiSdrWaterfallStream: $message');
-
-      }
     }
-    else {
-      onData(tag, value);
+    else if (dataTag == tag){
+      final parsedData = parseData(value);
+      _sendPort.send(parsedData);
     }
   }
 
-  void onData(String tag, Uint8List data);
+  dynamic parseData(Uint8List data);
   
   void _parseMessage(String message) {
     for (final property in message.split(' ')) {

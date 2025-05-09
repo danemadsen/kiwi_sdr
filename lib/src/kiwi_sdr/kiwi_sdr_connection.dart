@@ -1,15 +1,31 @@
 part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class KiwiSdrConnection {
-  final KiwiSdrSoundStream _soundStream;
-  final KiwiSdrWaterfallStream _waterfallStream;
+  final Isolate _soundIsolate;
+  final Isolate _waterfallIsolate;
+  final ReceivePort _soundReceivePort;
+  final ReceivePort _waterfallReceivePort;
+  final StreamController<Int16List> _soundStreamController = StreamController<Int16List>();
+  final StreamController<Float32List> _waterfallStreamController = StreamController<Float32List>();
 
-  KiwiSdrConnection({
-    required KiwiSdrSoundStream soundStream, 
-    required KiwiSdrWaterfallStream waterfallStream, 
-  }) : 
-  _soundStream = soundStream, 
-  _waterfallStream = waterfallStream;
+  Stream<Int16List> get soundStream => _soundStreamController.stream;
+
+  Stream<Float32List> get waterfallStream => _waterfallStreamController.stream;
+
+  KiwiSdrConnection._({
+    required Isolate soundIsolate,
+    required Isolate waterfallIsolate,
+    required ReceivePort soundReceivePort,
+    required ReceivePort waterfallReceivePort,
+  }) :
+    _soundIsolate = soundIsolate,
+    _waterfallIsolate = waterfallIsolate,
+    _soundReceivePort = soundReceivePort,
+    _waterfallReceivePort = waterfallReceivePort {
+    _soundReceivePort.listen(_soundStreamListener);
+
+    _waterfallReceivePort.listen(_waterfallStreamListener);
+  }
 
   static Future<KiwiSdrConnection> connect(String url) async {
     final versionResponse = await http.get(Uri.parse('$url/VER'));
@@ -28,26 +44,45 @@ class KiwiSdrConnection {
 
     final wsUrl = url.replaceAll(RegExp(r'https?'), 'ws');
 
-    final soundStream = KiwiSdrSoundStream(
-      versionMajor: maj,
-      versionMinor: min,
-      uri: Uri.parse('$wsUrl/ws/kiwi/$ts/SND')
+    final soundRecievePort = ReceivePort();
+
+    final soundIsolate = await Isolate.spawn(
+      KiwiSdrSoundStream.worker, 
+      (maj, min, '$wsUrl/ws/kiwi/$ts/SND', soundRecievePort.sendPort)
     );
 
-    final waterfallStream = KiwiSdrWaterfallStream(
-      versionMajor: maj,
-      versionMinor: min,
-      uri: Uri.parse('$wsUrl/ws/kiwi/$ts/W/F')
+    final waterfallReceivePort = ReceivePort();
+
+    final waterfallIsolate = await Isolate.spawn(
+      KiwiSdrWaterfallStream.worker, 
+      (maj, min, '$wsUrl/ws/kiwi/$ts/W/F', waterfallReceivePort.sendPort),
     );
 
-    return KiwiSdrConnection(
-      soundStream: soundStream,
-      waterfallStream: waterfallStream
+    return KiwiSdrConnection._(
+      soundIsolate: soundIsolate,
+      waterfallIsolate: waterfallIsolate,
+      soundReceivePort: soundRecievePort,
+      waterfallReceivePort: waterfallReceivePort,
     );
   }
 
+  void _soundStreamListener(dynamic data) {
+    if (data is Int16List) {
+      PCM.play(data.sublist(1), sampleRate: data[0].toDouble());
+    }
+  }
+
+  void _waterfallStreamListener(dynamic data) {
+    if (data is Float32List) {
+      _waterfallStreamController.add(data);
+    }
+  }
+
   void close() {
-    _soundStream.close();
-    _waterfallStream.close();
+    _soundIsolate.kill(priority: Isolate.immediate);
+    _waterfallIsolate.kill(priority: Isolate.immediate);
+
+    _soundReceivePort.close();
+    _waterfallReceivePort.close();
   }
 }
