@@ -37,6 +37,8 @@ abstract class KiwiSdrStream {
 
   double get frequency => _frequency!;
 
+  String get tag;
+
   KiwiSdrStream({
     required int versionMajor, 
     required int versionMinor, 
@@ -44,35 +46,31 @@ abstract class KiwiSdrStream {
   }) : 
     _socket = WebSocketChannel.connect(uri), 
     _versionMajor = versionMajor, 
-    _versionMinor = versionMinor 
-  {
-    _socket.stream.listen(_onChannelData);
+    _versionMinor = versionMinor {
     sendMessage('SET options=1');
 
     Timer.periodic(
       const Duration(seconds: 5), 
       _keepAliveTimer
     );
+
+    _socket.stream.listen(_onChannelData);
   }
 
   void _onChannelData(dynamic data) {
-    final tag = String.fromCharCodes(data.sublist(0, 3));
+    final dataTag = String.fromCharCodes(data.sublist(0, 3));
     final Uint8List value = data.sublist(3);
 
-    if (tag == 'MSG') {
+    if (dataTag == 'MSG') {
       final message = String.fromCharCodes(value);
       _parseMessage(message);
-      if (this is KiwiSdrWaterfallStream) {
-        print('KiwiSdrWaterfallStream: $message');
-
-      }
     }
-    else {
-      onData(tag, value);
+    else if (dataTag == tag){
+      acceptData(value);
     }
   }
 
-  void onData(String tag, Uint8List data);
+  void acceptData(Uint8List data);
   
   void _parseMessage(String message) {
     for (final property in message.split(' ')) {

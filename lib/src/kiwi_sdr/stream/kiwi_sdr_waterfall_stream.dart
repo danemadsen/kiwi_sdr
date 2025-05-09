@@ -1,31 +1,30 @@
 part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class KiwiSdrWaterfallStream extends KiwiSdrStream {
-  final StreamController<Float32List> _controller = StreamController<Float32List>.broadcast();
+  final StreamController<Float32List> _streamController = StreamController.broadcast();
 
-  Stream<Float32List> get stream => _controller.stream;
+  Stream<Float32List> get stream => _streamController.stream;
+
+  @override
+  String get tag => 'W/F';
 
   KiwiSdrWaterfallStream({
     required super.versionMajor,
     required super.versionMinor,
-    required super.uri,
+    required super.uri
   }) {
     setAuth('#');
     setupRxParams();
   }
 
   @override
-  void onData(String tag, Uint8List data) {
-    if (tag != 'W/F') developer.log('KiwiSdrWaterfallStream: $tag');
+  void acceptData(Uint8List data) {
     if (!configLoaded) return;
 
     // Skip header (14 bytes)
     final waterfallData = data.sublist(14);
 
-    final normalized = normalize(waterfallData);
-
-    // Send normalized data instead
-    _controller.sink.add(normalized);
+    _streamController.add(normalize(waterfallData));
   }
 
   Float32List normalize(Uint8List input) {
@@ -54,11 +53,5 @@ class KiwiSdrWaterfallStream extends KiwiSdrStream {
     setMaxDbMinDb(-10, -110);
     setWfSpeed(1);
     setWfInterp(13);
-  }
-
-  @override
-  void close() {
-    super.close();
-    _controller.close();
   }
 }
