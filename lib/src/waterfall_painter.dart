@@ -28,26 +28,22 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (samplesList.isEmpty) return;
-  
+
     final binCount = samplesList[0].length;
-    final binWidth = size.width / binCount;
-    final pixelSize = binWidth; // for square pixels
-  
-    final totalNeededHeight = pixelSize * samplesList.length;
-    final padding = size.height - totalNeededHeight;
-  
+    final pixelSize = size.width / binCount;
+
     for (int y = 0; y < samplesList.length; y++) {
       final samples = samplesList[y];
-  
+
       for (int x = 0; x < binCount; x++) {
         final color = _getWaterfallColor(samples[x]);
         final paint = Paint()..color = color;
-  
+
         canvas.drawRect(
           Rect.fromLTWH(
-            x * binWidth,
-            padding + y * pixelSize,
-            binWidth,
+            x * pixelSize,
+            y * pixelSize,
+            pixelSize,
             pixelSize,
           ),
           paint,
