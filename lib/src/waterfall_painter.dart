@@ -41,13 +41,9 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
         final color = _getWaterfallColor(samples[x]);
         final paint = Paint()..color = color;
 
-        canvas.drawRect(
-          Rect.fromLTWH(
-            x * pixelSize,
-            y * pixelSize,
-            pixelSize,
-            pixelSize,
-          ),
+        canvas.drawCircle(
+          Offset(x * pixelSize, y * pixelSize),
+          pixelSize,
           paint,
         );
       }
