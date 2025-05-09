@@ -32,7 +32,7 @@ class WaterfallWidget extends StatefulWidget {
 }
 
 class _WaterfallWidgetState extends State<WaterfallWidget> {
-  final List<Uint8List> _samplesBuffer = [];
+  final List<Float32List> _samplesBuffer = [];
   late KiwiSdrConnection _connection;
   int min = 255;
   int max = 0;
@@ -47,7 +47,7 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
   void initilizeBuffer() {
     // Buffer should have 2040 rows and 2040 columns
     for (int i = 0; i < 2040; i++) {
-      _samplesBuffer.add(Uint8List(2040));
+      _samplesBuffer.add(Float32List(2040));
     }
   }
 
@@ -55,13 +55,6 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
     _connection = await KiwiSdrConnection.connect('http://22274.proxy.kiwisdr.com:8073/');
     _connection.start();
     _connection.waterfallStream.listen((samples) => setState(() {
-      final newMin = samples.reduce((a, b) => a < b ? a : b);
-      min = newMin < min ? newMin : min;
-      final newMax = samples.reduce((a, b) => a > b ? a : b);
-      max = newMax > max ? newMax : max;
-      // print min and max values
-      print('min: $min');
-      print('max: $max');
       _samplesBuffer.insert(0, samples);
       if (_samplesBuffer.length > 2040) {
         _samplesBuffer.removeLast();
@@ -72,7 +65,7 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: WaterfallPainter(samplesList: List<Uint8List>.from(_samplesBuffer)),
+      painter: WaterfallPainter(samplesList: List<Float32List>.from(_samplesBuffer)),
       size: Size.infinite,
     );
   }

@@ -1,7 +1,7 @@
 part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class WaterfallPainter extends CustomPainter {
-  final List<Uint8List> samplesList;
+  final List<Float32List> samplesList;
 
   WaterfallPainter({required this.samplesList});
 
@@ -11,6 +11,7 @@ class WaterfallPainter extends CustomPainter {
     Colors.cyan,
     Colors.green,
     Colors.yellow,
+    Colors.orange,
     Colors.red,
   ];
 
@@ -24,14 +25,9 @@ class WaterfallPainter extends CustomPainter {
   
     for (int y = 0; y < samplesList.length; y++) {
       final samples = samplesList[y];
-      final min = samples.reduce((a, b) => a < b ? a : b);
-      final max = samples.reduce((a, b) => a > b ? a : b);
-      final range = (max - min).toDouble().clamp(1.0, double.infinity); // Avoid div by 0
   
       for (int x = 0; x < binCount; x++) {
-        final normalized = (samples[x] - min) / range;
-        final intensity = normalized.clamp(0.0, 1.0);
-        final color = _getWaterfallColor(intensity);
+        final color = _getWaterfallColor(samples[x]);
         final paint = Paint()..color = color;
   
         canvas.drawRect(

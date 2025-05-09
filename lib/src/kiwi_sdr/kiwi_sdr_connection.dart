@@ -70,5 +70,5 @@ class KiwiSdrConnection {
     _extensionStream.close();
   }
 
-  Stream<Uint8List> get waterfallStream => _waterfallStream.stream;
+  Stream<Float32List> get waterfallStream => _waterfallStream.stream;
 }

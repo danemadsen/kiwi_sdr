@@ -1,9 +1,11 @@
 part of 'package:flutter_sdr/flutter_sdr.dart';
 
 class KiwiSdrWaterfallStream extends KiwiSdrStream {
-  final StreamController<Uint8List> _controller = StreamController<Uint8List>.broadcast();
+  final StreamController<Float32List> _controller = StreamController<Float32List>.broadcast();
+  int _min = 255;
+  int _max = 0;
 
-  Stream<Uint8List> get stream => _controller.stream;
+  Stream<Float32List> get stream => _controller.stream;
 
   KiwiSdrWaterfallStream({
     required super.versionMajor,
@@ -22,19 +24,27 @@ class KiwiSdrWaterfallStream extends KiwiSdrStream {
     // Skip header (14 bytes)
     final waterfallData = data.sublist(14);
 
+    final min = waterfallData.reduce((a, b) => a < b ? a : b);
+    _min = min < _min ? min : _min;
+
+    final max = waterfallData.reduce((a, b) => a > b ? a : b);
+    _max = max > _max ? max : _max;
+
+    final normalized = normalize(waterfallData);
+
     // Send normalized data instead
-    _controller.sink.add(waterfallData);
+    _controller.sink.add(normalized);
   }
 
-  Uint8List normalizeInt16ToUint8(Int16List input) {
-    final output = Uint8List(input.length);
+  Float32List normalize(Uint8List input) {
+    final range = (_max - _min).toDouble().clamp(1.0, double.infinity); // Avoid div by 0
+    final Float32List output = Float32List(input.length);
+
     for (int i = 0; i < input.length; i++) {
-      // Clamp to prevent overflow if data has -32768
-      int clamped = input[i].clamp(-32767, 32767);
-      // Normalize to 0..1, then scale to 0..255
-      double normalized = (clamped + 32767) / 65534.0;
-      output[i] = (normalized * 255).round().clamp(0, 255);
+      final normalized = (input[i] - _min) / range;
+      output[i] = normalized.clamp(0.0, 1.0);
     }
+
     return output;
   }
 
