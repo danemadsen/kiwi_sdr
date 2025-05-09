@@ -51,7 +51,7 @@ class KiwiSdrWaterfallStream extends KiwiSdrStream {
   void setupRxParams() {
     setZoomCf(0, 0);
     setMaxDbMinDb(-10, -110);
-    setWfSpeed(1);
+    setWfSpeed(4);
     setWfInterp(13);
   }
 }
