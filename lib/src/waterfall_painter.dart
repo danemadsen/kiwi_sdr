@@ -10,7 +10,7 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
       if (samplesList.length >= 2040) {
         samplesList.removeLast();
       }
-      
+
       notifyListeners();
     });
   }
@@ -31,7 +31,10 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   
     final binCount = samplesList[0].length;
     final binWidth = size.width / binCount;
-    final lineHeight = size.height / samplesList.length;
+    final pixelSize = binWidth; // for square pixels
+  
+    final totalNeededHeight = pixelSize * samplesList.length;
+    final padding = size.height - totalNeededHeight;
   
     for (int y = 0; y < samplesList.length; y++) {
       final samples = samplesList[y];
@@ -42,10 +45,11 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   
         canvas.drawRect(
           Rect.fromLTWH(
-              x * binWidth,
-              size.height - (y + 1) * lineHeight,
-              binWidth,
-              lineHeight),
+            x * binWidth,
+            padding + y * pixelSize,
+            binWidth,
+            pixelSize,
+          ),
           paint,
         );
       }
