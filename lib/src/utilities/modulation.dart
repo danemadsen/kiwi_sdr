@@ -18,10 +18,51 @@ enum Modulation {
   cwn,
   nbfm,
   nnfm,
-  iq
-}
+  iq;
 
-extension SdrModeExtension on Modulation {
+  static Modulation fromString(String str) {
+    switch (str) {
+      case 'am':
+        return Modulation.am;
+      case 'amn':
+        return Modulation.amn;
+      case 'amw':
+        return Modulation.amw;
+      case 'sam':
+        return Modulation.sam;
+      case 'sal':
+        return Modulation.sal;
+      case 'sau':
+        return Modulation.sau;
+      case 'sas':
+        return Modulation.sas;
+      case 'qam':
+        return Modulation.qam;
+      case 'drm':
+        return Modulation.drm;
+      case 'lsb':
+        return Modulation.lsb;
+      case 'lsn':
+        return Modulation.lsn;
+      case 'usb':
+        return Modulation.usb;
+      case 'usn':
+        return Modulation.usn;
+      case 'cw':
+        return Modulation.cw;
+      case 'cwn':
+        return Modulation.cwn;
+      case 'nbfm':
+        return Modulation.nbfm;
+      case 'nnfm':
+        return Modulation.nnfm;
+      case 'iq':
+        return Modulation.iq;
+      default:
+        throw ArgumentError('Unknown modulation type: $str');
+    }
+  }
+
   int get lc {
     switch (this) {
       case Modulation.am:
