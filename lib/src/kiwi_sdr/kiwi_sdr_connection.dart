@@ -3,16 +3,13 @@ part of 'package:flutter_sdr/flutter_sdr.dart';
 class KiwiSdrConnection {
   final KiwiSdrSoundStream _soundStream;
   final KiwiSdrWaterfallStream _waterfallStream;
-  final KiwiSdrExtensionStream _extensionStream;
 
   KiwiSdrConnection({
     required KiwiSdrSoundStream soundStream, 
     required KiwiSdrWaterfallStream waterfallStream, 
-    required KiwiSdrExtensionStream extensionStream
   }) : 
   _soundStream = soundStream, 
-  _waterfallStream = waterfallStream, 
-  _extensionStream = extensionStream;
+  _waterfallStream = waterfallStream;
 
   static Future<KiwiSdrConnection> connect(String url) async {
     final versionResponse = await http.get(Uri.parse('$url/VER'));
@@ -43,16 +40,9 @@ class KiwiSdrConnection {
       uri: Uri.parse('$wsUrl/ws/kiwi/$ts/W/F')
     );
 
-    final extensionStream = KiwiSdrExtensionStream(
-      versionMajor: maj,
-      versionMinor: min,
-      uri: Uri.parse('$wsUrl/ws/kiwi/$ts/EXT')
-    );
-
     return KiwiSdrConnection(
       soundStream: soundStream,
-      waterfallStream: waterfallStream,
-      extensionStream: extensionStream
+      waterfallStream: waterfallStream
     );
   }
 
@@ -67,6 +57,5 @@ class KiwiSdrConnection {
   void close() {
     _soundStream.close();
     _waterfallStream.close();
-    _extensionStream.close();
   }
 }

@@ -52,26 +52,12 @@ class PCM {
     // Convert Int16List to Uint8List
     Uint8List pcmData = pcmSamples.buffer.asUint8List();
   
-    // Get the temporary directory to store the WAV file
-    Directory tempDir = await getTemporaryDirectory();
-  
-    // Ensure the directory exists
-    if (!(await tempDir.exists())) {
-      await tempDir.create(recursive: true);
-    }
-  
-    // Generate a sanitized Base64 hash for the file name
-    String fileName = _createBase64Hash(pcmSamples);
-  
-    File wavFile = File('${tempDir.path}/$fileName.wav');
-  
-    // Write WAV header and PCM data to file
-    await wavFile.writeAsBytes(_createWavFile(pcmData, sampleRate, channels, bitDepth));
+    final bytes = _createWavFile(pcmData, sampleRate, channels, bitDepth);
   
     // Play the WAV file
     AudioPlayer audioPlayer = AudioPlayer();
     await audioPlayer.play(
-      DeviceFileSource(wavFile.path),
+      BytesSource(bytes, mimeType: 'audio/wav'),
       mode: PlayerMode.lowLatency,
     );
 
@@ -80,26 +66,6 @@ class PCM {
 
     // Delay for a second to ensure the audio is finished playing
     await Future.delayed(const Duration(seconds: 1));
-  
-    // Delete the temporary WAV file
-    await wavFile.delete();
-  }
-  
-  static String _createBase64Hash(List<int> data) {
-    // Convert List<int> to Uint8List
-    Uint8List byteArray = Uint8List.fromList(data);
-    
-    // Hash the data using SHA-256
-    Digest hash = sha256.convert(byteArray);
-  
-    // Convert the hash to Base64 string
-    String base64Hash = base64Encode(hash.bytes);
-    
-    // Sanitize the Base64 string for use in a file name
-    // Replace `/` with `_`, `+` with `-`, and remove `=`
-    String sanitizedHash = base64Hash.replaceAll('/', '_').replaceAll('+', '-').replaceAll('=', '');
-    
-    return sanitizedHash;
   }
   
   // Function to create WAV file bytes from PCM data
