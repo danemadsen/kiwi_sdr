@@ -51,21 +51,21 @@ class PCM {
   static Future<void> play(Int16List pcmSamples, {double sampleRate = 16000, int channels = 1, int bitDepth = 16}) async {
     // Convert Int16List to Uint8List
     Uint8List pcmData = pcmSamples.buffer.asUint8List();
-  
+
+    // Create WAV file bytes
     final bytes = _createWavFile(pcmData, sampleRate, channels, bitDepth);
   
+    final audioPlayer = AudioPlayer();
+
     // Play the WAV file
-    AudioPlayer audioPlayer = AudioPlayer();
     await audioPlayer.play(
       BytesSource(bytes, mimeType: 'audio/wav'),
       mode: PlayerMode.lowLatency,
     );
 
-    // Wait for the audio to finish playing
     await audioPlayer.onPlayerComplete.first;
 
-    // Delay for a second to ensure the audio is finished playing
-    await Future.delayed(const Duration(seconds: 1));
+    audioPlayer.dispose();
   }
   
   // Function to create WAV file bytes from PCM data
