@@ -1,39 +1,34 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# kiwi_sdr
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+`kiwi_sdr` is a Dart package for interacting with KiwiSDR instances on the web. 
+It provides a simple API to access and control KiwiSDR devices, making it easier 
+to integrate them into your Dart applications.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- Listen to audio streams from KiwiSDR devices
+- View radio spectrum data as a waterfall
+- Control frequency and gain settings
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+To use the `kiwi_sdr` package, add it to your `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  kiwi_sdr: ^0.0.1
+```
+
+Then, import the package in your Dart code:
+
+```dart
+import 'package:kiwi_sdr/kiwi_sdr.dart';
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+Here's a simple example of how to use the `kiwi_sdr` package to connect to a KiwiSDR device and listen to its audio stream:
 
 ```dart
-const like = 'sample';
+await KiwiSDR.connect('http://22274.proxy.kiwisdr.com:8073/');
 ```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
