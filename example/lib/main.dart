@@ -30,7 +30,7 @@ class WaterfallWidget extends StatefulWidget {
 }
 
 class _WaterfallWidgetState extends State<WaterfallWidget> {
-  KiwiSDR? _connection;
+  KiwiSdr? _connection;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
   }
 
   Future<void> establishConnection() async {
-    _connection = await KiwiSDR.connect('http://22274.proxy.kiwisdr.com:8073/');
+    _connection = await KiwiSdr.connect('http://22274.proxy.kiwisdr.com:8073/');
     setState(() {});
   }
 

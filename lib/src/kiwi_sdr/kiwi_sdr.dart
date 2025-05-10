@@ -1,7 +1,7 @@
 part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 /// A class representing a connection to a KiwiSDR server.
-class KiwiSDR {
+class KiwiSdr {
   final StreamController<Float32List> _streamController =
       StreamController.broadcast();
   final _ImaAdpcmDecoder _decoder = _ImaAdpcmDecoder();
@@ -12,25 +12,63 @@ class KiwiSDR {
   int _versionMajor;
   int _versionMinor;
 
-  double get _kiwiVersion => _versionMajor + _versionMinor / 1000;
+  /// The version of the KiwiSDR server.
+  double get version => _versionMajor + _versionMinor / 1000;
 
   bool _configLoaded = false;
   bool _keepAlive = true;
 
   Modulation _mode;
+
+  /// The modulation mode of the KiwiSDR.
+  Modulation get mode => _mode;
+
+  double? _centerFrequency;
+
+  /// The center frequency of the KiwiSDR.
+  double? get centerFrequency => _centerFrequency;
+
   double? _maxFrequency;
+
+  /// The maximum frequency of the KiwiSDR.
+  double? get maxFrequency => _maxFrequency;
+
   int? _maxZoom;
+
+  /// The maximum zoom level of the waterfall.
+  int? get maxZoom => _maxZoom;
+
   int? _fftSize;
   double? _sampleRate;
+
+  /// The sample rate of the KiwiSDR.
+  double? get sampleRate => _sampleRate;
+  
   int? _lowCut;
+
+  /// The lower cutoff frequency of the KiwiSDR.
+  int? get lowCut => _lowCut;
+
   int? _highCut;
+
+  /// The higher cutoff frequency of the KiwiSDR.
+  int? get highCut => _highCut;
+
   double? _frequency;
+
+  /// The frequency of the KiwiSDR.
+  double? get frequency => _frequency;
+
+
   double? _frequencyOffset;
+
+  /// The frequency offset of the KiwiSDR.
+  double? get frequencyOffset => _frequencyOffset;
 
   /// A stream of waterfall data.
   Stream<Float32List> get waterfallStream => _streamController.stream;
 
-  KiwiSDR._({
+  KiwiSdr._({
     required int versionMajor,
     required int versionMinor,
     required WebSocketChannel soundSocket,
@@ -54,7 +92,7 @@ class KiwiSDR {
   }
 
   /// Creates a new connection to a KiwiSDR server.
-  static Future<KiwiSDR> connect(String url,
+  static Future<KiwiSdr> connect(String url,
       [Modulation mode = Modulation.am]) async {
     final versionResponse = await http.get(Uri.parse('$url/VER'));
 
@@ -77,7 +115,7 @@ class KiwiSDR {
     final waterfallSocket =
         WebSocketChannel.connect(Uri.parse('$wsUrl/ws/kiwi/$ts/W/F'));
 
-    return KiwiSDR._(
+    return KiwiSdr._(
       versionMajor: maj,
       versionMinor: min,
       soundSocket: soundSocket,
@@ -142,8 +180,11 @@ class KiwiSDR {
       case 'freq_offset':
         _frequencyOffset = double.parse(value);
         break;
+      case 'center_freq':
+        _centerFrequency = double.parse(value);
+        break;
       case 'bandwidth':
-        _maxFrequency = double.parse(value) / 1000;
+        _maxFrequency = double.parse(value);
         break;
       case 'cfg_loaded':
         _configLoaded = true;
@@ -304,7 +345,7 @@ class KiwiSDR {
 
   /// Set the zoom level and center frequency for the waterfall.
   void setZoomCf(int zoom, double cfkHz) {
-    if (_kiwiVersion > 1.329) {
+    if (version > 1.329) {
       _waterfallSocket.sink.add('SET zoom=$zoom cf=$cfkHz');
     } else if (zoom <= 0 || zoom > (_maxZoom ?? 14)) {
       throw KiwiSdrException('Invalid zoom level: $zoom');

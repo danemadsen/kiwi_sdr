@@ -22,7 +22,7 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   Size _lastSize = Size.zero;
 
   /// Creates a [WaterfallPainter] instance with the given [connection].
-  WaterfallPainter({required KiwiSDR connection}) {
+  WaterfallPainter({required KiwiSdr connection}) {
     connection.waterfallStream.listen((samples) {
       _samplesList.insert(0, samples);
 
