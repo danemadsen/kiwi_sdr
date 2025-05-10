@@ -50,7 +50,7 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
     }
 
     return CustomPaint(
-      painter: WaterfallPainter(connection: _connection!),
+      painter: WaterfallPainter(_connection!),
       size: Size.infinite,
     );
   }

@@ -12,6 +12,7 @@ const List<Color> _waterfallColors = [
 
 /// A custom painter for rendering a waterfall display using the provided samples.
 class WaterfallPainter extends ChangeNotifier implements CustomPainter {
+  final KiwiSdr _sdr;
   final List<Float32List> _samplesList = [];
   int _maxSamples = 512;
 
@@ -21,9 +22,9 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   ui.Image? _imageBuffer;
   Size _lastSize = Size.zero;
 
-  /// Creates a [WaterfallPainter] instance with the given [connection].
-  WaterfallPainter({required KiwiSdr connection}) {
-    connection.waterfallStream.listen((samples) {
+  /// Creates a [WaterfallPainter] instance with the given [sdr].
+  WaterfallPainter(this._sdr) {
+    _sdr.waterfallStream.listen((samples) {
       _samplesList.insert(0, samples);
 
       if (_lastSize != Size.zero) {
@@ -87,13 +88,16 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   }
 
   Color _getWaterfallColor(double value) {
-    final step = 1 / (_waterfallColors.length - 1);
-    final idx = (value / step).floor();
+    // Clamp and normalize to [0.0, 1.0]
+    final clamped = ((value - _sdr.waterfallMin) / (_sdr.waterfallMax - _sdr.waterfallMin)).clamp(0.0, 1.0);
+
+    final step = 1.0 / (_waterfallColors.length - 1);
+    final idx = (clamped / step).floor();
     if (idx >= _waterfallColors.length - 1) return _waterfallColors.last;
 
     final startColor = _waterfallColors[idx];
     final endColor = _waterfallColors[idx + 1];
-    final localValue = (value - (step * idx)) / step;
+    final localValue = (clamped - (step * idx)) / step;
 
     return Color.lerp(startColor, endColor, localValue)!;
   }
