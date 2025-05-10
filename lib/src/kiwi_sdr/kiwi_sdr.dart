@@ -243,14 +243,13 @@ class KiwiSdr {
 
     final min = waterfallData.reduce((a, b) => a < b ? a : b);
     final max = waterfallData.reduce((a, b) => a > b ? a : b);
-    final fifty = (max - min) / 3;
-    final range = (max - (min + fifty))
+    final range = (max - min)
         .toDouble()
         .clamp(1.0, double.infinity); // Avoid div by 0
     final Float32List output = Float32List(waterfallData.length);
 
     for (int i = 0; i < waterfallData.length; i++) {
-      final normalized = (waterfallData[i] - (min + fifty)) / range;
+      final normalized = (waterfallData[i] - min) / range;
       output[i] = normalized.clamp(0.0, 1.0);
     }
 
