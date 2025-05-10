@@ -20,8 +20,8 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   ui.Image? _imageBuffer;
   Size _lastSize = Size.zero;
 
-  WaterfallPainter({required KiwiSdrConnection connection}) {
-    connection._waterfallStream.stream.listen((samples) {
+  WaterfallPainter({required KiwiSDR connection}) {
+    connection.waterfallStream.listen((samples) {
       samplesList.insert(0, samples);
 
       if (_lastSize != Size.zero) {

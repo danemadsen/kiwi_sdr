@@ -12,10 +12,8 @@ import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 part 'src/utilities/modulation.dart';
-part 'src/kiwi_sdr/kiwi_sdr_connection.dart';
 part 'src/kiwi_sdr/kiwi_sdr_exception.dart';
-part 'src/kiwi_sdr/stream/kiwi_sdr_stream.dart';
-part 'src/kiwi_sdr/stream/kiwi_sdr_sound_stream.dart';
-part 'src/kiwi_sdr/stream/kiwi_sdr_waterfall_stream.dart';
 part 'src/utilities/ima_adpcm_decoder.dart';
 part 'src/waterfall_painter.dart';
+part 'src/kiwi_sdr/kiwi_sdr.dart';
+part 'src/utilities/create_wav_file.dart';
