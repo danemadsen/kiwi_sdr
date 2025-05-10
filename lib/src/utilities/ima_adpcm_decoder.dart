@@ -111,7 +111,7 @@ const List<int> _indexAdjustTable = [
   8
 ];
 
-class ImaAdpcmDecoder {
+class _ImaAdpcmDecoder {
   int _index = 0;
   int _prev = 0;
 

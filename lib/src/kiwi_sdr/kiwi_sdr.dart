@@ -1,9 +1,10 @@
 part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
+/// A class representing a connection to a KiwiSDR server.
 class KiwiSDR {
   final StreamController<Float32List> _streamController =
       StreamController.broadcast();
-  final ImaAdpcmDecoder _decoder = ImaAdpcmDecoder();
+  final _ImaAdpcmDecoder _decoder = _ImaAdpcmDecoder();
 
   final WebSocketChannel _soundSocket;
   final WebSocketChannel _waterfallSocket;
@@ -26,6 +27,7 @@ class KiwiSDR {
   double? _frequency;
   double? _frequencyOffset;
 
+  /// A stream of waterfall data.
   Stream<Float32List> get waterfallStream => _streamController.stream;
 
   KiwiSDR._({
@@ -51,6 +53,7 @@ class KiwiSDR {
     _waterfallSocket.stream.listen(_onSocketData);
   }
 
+  /// Creates a new connection to a KiwiSDR server.
   static Future<KiwiSDR> connect(String url,
       [Modulation mode = Modulation.am]) async {
     final versionResponse = await http.get(Uri.parse('$url/VER'));
@@ -230,8 +233,8 @@ class KiwiSDR {
   }
 
   void _setupSoundParams() {
-    setModulation(Modulation.am, hc: -4900, lc: 4900, frequency: 612.0);
-    setAgc(1, 0, -100, 6, 1000, 50);
+    setModulation(_mode, frequency: 612.0);
+    setAutomaticGainControl(1, 0, -100, 6, 1000, 50);
   }
 
   void _setupWaterfallParams() {
@@ -241,28 +244,34 @@ class KiwiSDR {
     setWaterfallInterp(13);
   }
 
-  void setAgc(
+  /// Set the AGC (Automatic Gain Control) parameters.
+  void setAutomaticGainControl(
           int on, int hang, int threshold, int slope, int decay, int gain) =>
       _soundSocket.sink.add(
           'SET agc=$on hang=$hang thresh=$threshold slope=$slope decay=$decay manGain=$gain');
 
+  /// Set the audio rate for the KiwiSDR.
   void setAudioRate(int inRate, int outRate) =>
       _soundSocket.sink.add('SET AR OK in=$inRate out=$outRate');
 
+  /// Set the squelch parameters.
   void setSquelch(int squelch, int threshold) =>
       _soundSocket.sink.add('SET squelch=$squelch max=$threshold');
 
+  /// Set the frequency generator parameters.
   void setGen(int freq, int attn) {
     _broadcastMessage('SET genattn=$attn');
     _broadcastMessage('SET gen=$freq mix=-1');
   }
 
+  /// Set the frequency for the KiwiSDR.
   void setFrequency(double frequency) {
     _frequency = frequency;
 
     setModulation(_mode, frequency: frequency);
   }
 
+  /// Set the modulation mode for the KiwiSDR.
   void setModulation(Modulation mode, {int? lc, int? hc, double? frequency}) {
     _mode = mode;
 
@@ -293,6 +302,7 @@ class KiwiSDR {
         'SET mod=${mode.name} low_cut=$_lowCut high_cut=$_highCut freq=$freq');
   }
 
+  /// Set the zoom level and center frequency for the waterfall.
   void setZoomCf(int zoom, double cfkHz) {
     if (_kiwiVersion > 1.329) {
       _waterfallSocket.sink.add('SET zoom=$zoom cf=$cfkHz');
@@ -309,15 +319,18 @@ class KiwiSDR {
     }
   }
 
+  /// Set the maximum and minimum dB values for the waterfall.
   void setMaxDbMinDb(int maxDb, int minDb) =>
       _waterfallSocket.sink.add('SET maxdb=$maxDb mindb=$minDb');
 
+  /// Set the speed of the waterfall.
   void setWaterfallSpeed(int speed) {
     speed = max(1, min(4, speed)); // clamp to 1-4
 
     _waterfallSocket.sink.add('SET wf_speed=$speed');
   }
 
+  /// Set the interpolation method for the waterfall.
   void setWaterfallInterp(int interp) {
     if (interp == -1) {
       interp = 13;
@@ -330,22 +343,29 @@ class KiwiSDR {
     _waterfallSocket.sink.add('SET interp=$interp');
   }
 
+  /// Set the frequency offset for the waterfall.
   void setWindowFunc(int windowFunc) =>
       _broadcastMessage('SET window_func=$windowFunc');
 
+  /// Set the authentication token for the KiwiSDR.
   void setAuthentication(String token) =>
       _broadcastMessage('SET auth t=kiwi p=$token');
 
+  /// Set the user name for the KiwiSDR.
   void setUserName(String name) => _broadcastMessage('SET ident_user=$name');
 
+  /// Set the geolocation for the KiwiSDR.
   void setGeolocation(String geo) => _broadcastMessage('SET geo=$geo');
 
+  /// Set the compression for the sound and waterfall data.
   void setSoundCompression(bool enabled) =>
       _soundSocket.sink.add('SET compression=${enabled ? 1 : 0}');
 
+  /// Set the compression for the waterfall data.
   void setWaterfallCompression(bool enabled) =>
       _waterfallSocket.sink.add('SET wf_comp=${enabled ? 1 : 0}');
 
+  /// Set the noise blanker parameters.
   void setNoiseBlanker(int gate, int threshold, bool noiseBlanker) {
     _soundSocket.sink.add('SET nb algo=1');
     _soundSocket.sink.add('SET nb type=0 param=0 pval=$gate');
@@ -356,6 +376,7 @@ class KiwiSDR {
     _soundSocket.sink.add('SET nb type=2 en=0');
   }
 
+  /// Set the noise blanker parameters.
   void close() {
     _keepAlive = false;
     _soundSocket.sink.close();
