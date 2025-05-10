@@ -1,4 +1,4 @@
-library flutter_sdr;
+library kiwi_sdr;
 
 import 'dart:async';
 import 'dart:convert';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sdr/flutter_sdr.dart';
+import 'package:kiwi_sdr/kiwi_sdr.dart';
 
 void main() {
   runApp(const MyApp());

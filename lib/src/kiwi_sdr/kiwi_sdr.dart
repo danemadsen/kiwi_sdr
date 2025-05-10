@@ -1,4 +1,4 @@
-part of 'package:flutter_sdr/flutter_sdr.dart';
+part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 class KiwiSDR {
   final StreamController<Float32List> _streamController = StreamController.broadcast();

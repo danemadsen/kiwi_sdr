@@ -1,4 +1,4 @@
-part of 'package:flutter_sdr/flutter_sdr.dart';
+part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 const List<int> _stepSizeTable = [
   7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41,

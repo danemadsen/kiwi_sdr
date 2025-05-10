@@ -1,4 +1,4 @@
-part of 'package:flutter_sdr/flutter_sdr.dart';
+part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 enum Modulation {
   am(-4900, 4900),
