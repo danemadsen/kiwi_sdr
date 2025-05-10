@@ -1,7 +1,7 @@
 name: kiwi_sdr
 description: "A new Flutter package for working with KiwiSDR Software Defined Radios."
 version: 0.0.1
-homepage:
+homepage: "https://github.com/danemadsen/kiwi_sdr"
 
 environment:
   sdk: ^3.5.3
