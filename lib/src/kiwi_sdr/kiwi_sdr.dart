@@ -43,7 +43,7 @@ class KiwiSdr {
 
   /// The sample rate of the KiwiSDR.
   double? get sampleRate => _sampleRate;
-  
+
   int? _lowCut;
 
   /// The lower cutoff frequency of the KiwiSDR.
@@ -58,7 +58,6 @@ class KiwiSdr {
 
   /// The frequency of the KiwiSDR.
   double? get frequency => _frequency;
-
 
   double? _frequencyOffset;
 
