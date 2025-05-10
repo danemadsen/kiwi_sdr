@@ -1,6 +1,7 @@
 part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
-Uint8List _createWavFile(Uint8List pcmData, double sampleRate, int channels, int bitDepth) {
+Uint8List _createWavFile(
+    Uint8List pcmData, double sampleRate, int channels, int bitDepth) {
   int byteRate = sampleRate * channels * bitDepth ~/ 8;
   int blockAlign = channels * bitDepth ~/ 8;
   int fileSize = 36 + pcmData.length;

@@ -1,7 +1,8 @@
 part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 class KiwiSDR {
-  final StreamController<Float32List> _streamController = StreamController.broadcast();
+  final StreamController<Float32List> _streamController =
+      StreamController.broadcast();
   final ImaAdpcmDecoder _decoder = ImaAdpcmDecoder();
 
   final WebSocketChannel _soundSocket;
@@ -33,28 +34,25 @@ class KiwiSDR {
     required WebSocketChannel soundSocket,
     required WebSocketChannel waterfallSocket,
     required Modulation mode,
-  }) :
-    _versionMajor = versionMajor,
-    _versionMinor = versionMinor,
-    _soundSocket = soundSocket,
-    _waterfallSocket = waterfallSocket,
-    _mode = mode {
+  })  : _versionMajor = versionMajor,
+        _versionMinor = versionMinor,
+        _soundSocket = soundSocket,
+        _waterfallSocket = waterfallSocket,
+        _mode = mode {
     setAuthentication('#');
     setSoundCompression(true);
     setNoiseBlanker(100, 50, true);
     _soundSocket.sink.add('SET de_emp=0 nfm=1');
     _soundSocket.sink.add('SET little-endian');
 
-    Timer.periodic(
-      const Duration(seconds: 5), 
-      _keepAliveTimer
-    );
+    Timer.periodic(const Duration(seconds: 5), _keepAliveTimer);
 
     _soundSocket.stream.listen(_onSocketData);
     _waterfallSocket.stream.listen(_onSocketData);
   }
 
-  static Future<KiwiSDR> connect(String url, [Modulation mode = Modulation.am]) async {
+  static Future<KiwiSDR> connect(String url,
+      [Modulation mode = Modulation.am]) async {
     final versionResponse = await http.get(Uri.parse('$url/VER'));
 
     int maj, min, ts;
@@ -64,20 +62,17 @@ class KiwiSDR {
       maj = versionData['maj'];
       min = versionData['min'];
       ts = versionData['ts'];
-    } 
-    else {
+    } else {
       throw KiwiSdrException('Failed get KiwiSDR version');
     }
 
     final wsUrl = url.replaceAll(RegExp(r'https?'), 'ws');
 
-    final soundSocket = WebSocketChannel.connect(
-      Uri.parse('$wsUrl/ws/kiwi/$ts/SND')
-    );
+    final soundSocket =
+        WebSocketChannel.connect(Uri.parse('$wsUrl/ws/kiwi/$ts/SND'));
 
-    final waterfallSocket = WebSocketChannel.connect(
-      Uri.parse('$wsUrl/ws/kiwi/$ts/W/F')
-    );
+    final waterfallSocket =
+        WebSocketChannel.connect(Uri.parse('$wsUrl/ws/kiwi/$ts/W/F'));
 
     return KiwiSDR._(
       versionMajor: maj,
@@ -95,11 +90,9 @@ class KiwiSDR {
     if (dataTag == 'MSG') {
       final message = String.fromCharCodes(value);
       _parseMessage(message);
-    }
-    else if (dataTag == 'SND'){
+    } else if (dataTag == 'SND') {
       _processSoundData(value);
-    }
-    else if (dataTag == 'W/F'){
+    } else if (dataTag == 'W/F') {
       _processWaterfallData(value);
     }
   }
@@ -109,8 +102,7 @@ class KiwiSDR {
       final parts = property.split('=');
       if (parts.length == 2) {
         _parseProperty(parts[0], parts[1]);
-      }
-      else {
+      } else {
         _parseProperty(property, '');
       }
     }
@@ -132,7 +124,7 @@ class KiwiSDR {
         _setupWaterfallParams();
         _setKeepAlive();
         break;
-      case 'zoom_max': 
+      case 'zoom_max':
         _maxZoom = int.parse(value);
         break;
       case 'wf_fft_size':
@@ -154,9 +146,11 @@ class KiwiSDR {
         _configLoaded = true;
         break;
       case 'too_busy':
-        throw KiwiSdrException('KiwiSDR too busy. All $value client slots are in use.');
+        throw KiwiSdrException(
+            'KiwiSDR too busy. All $value client slots are in use.');
       case 'redirect':
-        throw KiwiSdrException('KiwiSDR redirect to ${Uri.decodeComponent(value)}');
+        throw KiwiSdrException(
+            'KiwiSDR redirect to ${Uri.decodeComponent(value)}');
       case 'badp':
         switch (value) {
           case '0':
@@ -164,7 +158,8 @@ class KiwiSDR {
           case '1':
             throw KiwiSdrException('KiwiSDR bad password');
           case '5':
-            throw KiwiSdrException('KiwiSDR multiple connections from the same IP address');
+            throw KiwiSdrException(
+                'KiwiSDR multiple connections from the same IP address');
           default:
             throw KiwiSdrException('KiwiSDR password error: $value');
         }
@@ -178,12 +173,12 @@ class KiwiSDR {
     if (!_configLoaded) return;
 
     Uint8List adpcmBytes = data.sublist(7);
-    
+
     Uint8List pcmSamples = _decoder.decode(adpcmBytes);
 
     // Create WAV file bytes
     final bytes = _createWavFile(pcmSamples, _sampleRate!, 1, 16);
-  
+
     final audioPlayer = AudioPlayer();
 
     // Play the WAV file
@@ -206,7 +201,9 @@ class KiwiSDR {
     final min = waterfallData.reduce((a, b) => a < b ? a : b);
     final max = waterfallData.reduce((a, b) => a > b ? a : b);
     final fifty = (max - min) / 3;
-    final range = (max - (min + fifty)).toDouble().clamp(1.0, double.infinity); // Avoid div by 0
+    final range = (max - (min + fifty))
+        .toDouble()
+        .clamp(1.0, double.infinity); // Avoid div by 0
     final Float32List output = Float32List(waterfallData.length);
 
     for (int i = 0; i < waterfallData.length; i++) {
@@ -227,8 +224,7 @@ class KiwiSDR {
   void _keepAliveTimer(Timer timer) {
     if (_keepAlive) {
       _setKeepAlive();
-    } 
-    else {
+    } else {
       timer.cancel();
     }
   }
@@ -246,17 +242,15 @@ class KiwiSDR {
   }
 
   void setAgc(
-    int on, 
-    int hang, 
-    int threshold, 
-    int slope, 
-    int decay, 
-    int gain
-  ) => _soundSocket.sink.add('SET agc=$on hang=$hang thresh=$threshold slope=$slope decay=$decay manGain=$gain');
+          int on, int hang, int threshold, int slope, int decay, int gain) =>
+      _soundSocket.sink.add(
+          'SET agc=$on hang=$hang thresh=$threshold slope=$slope decay=$decay manGain=$gain');
 
-  void setAudioRate(int inRate, int outRate) => _soundSocket.sink.add('SET AR OK in=$inRate out=$outRate');
+  void setAudioRate(int inRate, int outRate) =>
+      _soundSocket.sink.add('SET AR OK in=$inRate out=$outRate');
 
-  void setSquelch(int squelch, int threshold) => _soundSocket.sink.add('SET squelch=$squelch max=$threshold');
+  void setSquelch(int squelch, int threshold) =>
+      _soundSocket.sink.add('SET squelch=$squelch max=$threshold');
 
   void setGen(int freq, int attn) {
     _broadcastMessage('SET genattn=$attn');
@@ -271,25 +265,22 @@ class KiwiSDR {
 
   void setModulation(Modulation mode, {int? lc, int? hc, double? frequency}) {
     _mode = mode;
-    
+
     if (lc != null) {
       _lowCut = lc;
-    }
-    else {
+    } else {
       _lowCut = mode.lc;
     }
 
     if (hc != null) {
       _highCut = hc;
-    }
-    else {
+    } else {
       _highCut = mode.hc;
     }
 
     if (frequency != null) {
       _frequency = frequency;
-    }
-    else {
+    } else {
       _frequency ??= 0.0;
     }
 
@@ -298,24 +289,28 @@ class KiwiSDR {
       freq -= _frequencyOffset!;
     }
 
-    _soundSocket.sink.add('SET mod=${mode.name} low_cut=$_lowCut high_cut=$_highCut freq=$freq');
+    _soundSocket.sink.add(
+        'SET mod=${mode.name} low_cut=$_lowCut high_cut=$_highCut freq=$freq');
   }
 
   void setZoomCf(int zoom, double cfkHz) {
     if (_kiwiVersion > 1.329) {
       _waterfallSocket.sink.add('SET zoom=$zoom cf=$cfkHz');
-    }
-    else if (zoom <= 0 || zoom > (_maxZoom ?? 14)) {
+    } else if (zoom <= 0 || zoom > (_maxZoom ?? 14)) {
       throw KiwiSdrException('Invalid zoom level: $zoom');
-    }
-    else {
+    } else {
       final startFrequency = cfkHz - (_maxFrequency! / pow(2, zoom)) / 2;
-      final counter = (startFrequency / _maxFrequency! * pow(2, _maxZoom ?? 14) * (_fftSize ?? 1024)).round();
+      final counter = (startFrequency /
+              _maxFrequency! *
+              pow(2, _maxZoom ?? 14) *
+              (_fftSize ?? 1024))
+          .round();
       _waterfallSocket.sink.add('SET zoom=$zoom start=$counter');
     }
   }
 
-  void setMaxDbMinDb(int maxDb, int minDb) => _waterfallSocket.sink.add('SET maxdb=$maxDb mindb=$minDb');
+  void setMaxDbMinDb(int maxDb, int minDb) =>
+      _waterfallSocket.sink.add('SET maxdb=$maxDb mindb=$minDb');
 
   void setWaterfallSpeed(int speed) {
     speed = max(1, min(4, speed)); // clamp to 1-4
@@ -335,17 +330,21 @@ class KiwiSDR {
     _waterfallSocket.sink.add('SET interp=$interp');
   }
 
-  void setWindowFunc(int windowFunc) => _broadcastMessage('SET window_func=$windowFunc');
+  void setWindowFunc(int windowFunc) =>
+      _broadcastMessage('SET window_func=$windowFunc');
 
-  void setAuthentication(String token) => _broadcastMessage('SET auth t=kiwi p=$token');
+  void setAuthentication(String token) =>
+      _broadcastMessage('SET auth t=kiwi p=$token');
 
   void setUserName(String name) => _broadcastMessage('SET ident_user=$name');
 
   void setGeolocation(String geo) => _broadcastMessage('SET geo=$geo');
 
-  void setSoundCompression(bool enabled) => _soundSocket.sink.add('SET compression=${enabled ? 1 : 0}');
+  void setSoundCompression(bool enabled) =>
+      _soundSocket.sink.add('SET compression=${enabled ? 1 : 0}');
 
-  void setWaterfallCompression(bool enabled) => _waterfallSocket.sink.add('SET wf_comp=${enabled ? 1 : 0}');
+  void setWaterfallCompression(bool enabled) =>
+      _waterfallSocket.sink.add('SET wf_comp=${enabled ? 1 : 0}');
 
   void setNoiseBlanker(int gate, int threshold, bool noiseBlanker) {
     _soundSocket.sink.add('SET nb algo=1');
