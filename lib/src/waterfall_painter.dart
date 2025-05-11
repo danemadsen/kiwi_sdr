@@ -13,11 +13,7 @@ const List<Color> _waterfallColors = [
 /// A custom painter for rendering a waterfall display using the provided samples.
 class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   final KiwiSdr _sdr;
-  final List<Float32List> _samplesList = [];
-  int _maxSamples = 512;
-
-  int _binCount = 0;
-  double _pixelSize = 1.0;
+  Float32List? _samplesBuffer;
 
   ui.Image? _imageBuffer;
   Size _lastSize = Size.zero;
@@ -25,14 +21,10 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   /// Creates a [WaterfallPainter] instance with the given [sdr].
   WaterfallPainter(this._sdr) {
     _sdr.waterfallStream.listen((samples) {
-      _samplesList.insert(0, samples);
+      _samplesBuffer = samples;
 
       if (_lastSize != Size.zero) {
         _updateImageBuffer(_lastSize);
-      }
-
-      if (_samplesList.length > _maxSamples) {
-        _samplesList.removeRange(_maxSamples, _samplesList.length);
       }
 
       notifyListeners(); // triggers CustomPaint to repaint
@@ -40,15 +32,13 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _updateImageBuffer(Size size) async {
-    if (_samplesList.isEmpty) return;
+    if (_samplesBuffer == null) return;
 
     final width = size.width;
     final height = size.height;
     _lastSize = size;
 
-    _binCount = _samplesList[0].length;
-    _pixelSize = width / _binCount;
-    _maxSamples = height ~/ _pixelSize;
+    final pixelSize = width / _samplesBuffer!.length;
 
     // Shift previous image content up
     final recorder = ui.PictureRecorder();
@@ -56,19 +46,18 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
 
     // Draw existing image if present
     if (_imageBuffer != null) {
-      final src = Rect.fromLTWH(0, 0, width, height - _pixelSize);
-      final dst = Rect.fromLTWH(0, _pixelSize, width, height - _pixelSize);
+      final src = Rect.fromLTWH(0, 0, width, height - pixelSize);
+      final dst = Rect.fromLTWH(0, pixelSize, width, height - pixelSize);
       canvas.drawImageRect(_imageBuffer!, src, dst, Paint());
     }
 
     // Draw new samples row at the bottom
-    final samples = _samplesList.first;
-    for (int x = 0; x < _binCount; x++) {
-      final color = _getWaterfallColor(samples[x]);
+    for (int x = 0; x < _samplesBuffer!.length; x++) {
+      final color = _getWaterfallColor(_samplesBuffer![x]);
       final paint = Paint()..color = color;
 
       canvas.drawRect(
-        Rect.fromLTWH(x * _pixelSize, 0, _pixelSize, _pixelSize),
+        Rect.fromLTWH(x * pixelSize, 0, pixelSize, pixelSize),
         paint,
       );
     }
