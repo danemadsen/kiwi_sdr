@@ -78,7 +78,7 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
 
   Color _getWaterfallColor(double value) {
     // Clamp and normalize to [0.0, 1.0]
-    final clamped = ((value - _sdr.waterfallMin) / (_sdr.waterfallMax - _sdr.waterfallMin)).clamp(0.0, 1.0);
+    final clamped = value.clamp(0.0, 1.0);
 
     final step = 1.0 / (_waterfallColors.length - 1);
     final idx = (clamped / step).floor();

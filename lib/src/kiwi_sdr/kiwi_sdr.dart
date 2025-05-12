@@ -67,12 +67,6 @@ class KiwiSdr {
   /// A stream of waterfall data.
   Stream<Float32List> get waterfallStream => _streamController.stream;
 
-  /// The minimum value of the waterfall data.
-  double waterfallMin = 0.0;
-
-  /// The maximum value of the waterfall data.
-  double waterfallMax = 1.0;
-
   KiwiSdr._({
     required int versionMajor,
     required int versionMinor,
@@ -258,7 +252,7 @@ class KiwiSdr {
       final normalized = (waterfallData[i] - min) / range;
       output[i] = normalized.clamp(0.0, 1.0);
     }
-
+    
     _streamController.add(output);
   }
 
