@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const WaterfallWidget(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -49,15 +50,7 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Column(
-      children: [
-        FrequencyScaleBar(sdr: _connection!),
-        Flexible(child: CustomPaint(
-          painter: WaterfallPainter(sdr: _connection!),
-          size: Size.infinite,
-        ))
-      ]
-    );
+    return Waterfall(sdr: _connection!);
   }
 
   @override
