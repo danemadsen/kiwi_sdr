@@ -87,12 +87,6 @@ class KiwiSdr extends ChangeNotifier {
   /// The maximum dB value for the waterfall.
   int? get maxDb => _maxDb;
 
-  /// The value used to clamp the waterfall dB values.
-  double ceilDb = -10.0;
-
-  /// The value used to clamp the waterfall dB values.
-  double floorDb = 70.0;
-
   KiwiSdr._({
     required int versionMajor,
     required int versionMinor,
@@ -269,17 +263,10 @@ class KiwiSdr extends ChangeNotifier {
     // Skip header (14 bytes)
     final waterfallData = data.sublist(14);
 
-    print('Waterfall data length: ${waterfallData.length}');
-
-    final min = dbToByte(_minDb! + floorDb);
-    final max = dbToByte(_maxDb! + ceilDb);
-    final range = (max - min)
-        .toDouble()
-        .clamp(1.0, double.infinity); // Avoid div by 0
     final Float32List output = Float32List(waterfallData.length);
 
     for (int i = 0; i < waterfallData.length; i++) {
-      final normalized = (waterfallData[i] - min) / range;
+      final normalized = (waterfallData[i] - 180) / 50;
       output[i] = normalized.clamp(0.0, 1.0);
     }
     
@@ -314,7 +301,7 @@ class KiwiSdr extends ChangeNotifier {
   }
 
   /// Convert dB value to byte value.
-  int dbToByte(double db) {
+  int dbToByte(num db) {
     if (_maxDb == null || _minDb == null) {
       throw KiwiSdrException('Max and min dB values are not set');
     }
