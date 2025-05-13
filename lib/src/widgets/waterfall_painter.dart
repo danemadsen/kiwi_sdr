@@ -54,8 +54,8 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
 
     // Draw existing image if present
     if (_imageBuffer != null) {
-      final src = Rect.fromLTWH(0, 0, width, height - pixelSize);
-      final dst = Rect.fromLTWH(0, pixelSize, width, height - pixelSize);
+      final src = Rect.fromLTWH(0, 0, width, height - 1);
+      final dst = Rect.fromLTWH(0, 1, width, height - 1);
       canvas.drawImageRect(_imageBuffer!, src, dst, Paint());
     }
 
@@ -65,7 +65,7 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
       final paint = Paint()..color = color;
 
       canvas.drawRect(
-        Rect.fromLTWH(x * pixelSize, 0, pixelSize, pixelSize),
+        Rect.fromLTWH(x * pixelSize, 0, pixelSize, 1),
         paint,
       );
     }
