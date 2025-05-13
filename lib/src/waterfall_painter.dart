@@ -2,12 +2,17 @@ part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 const List<Color> _waterfallColors = [
   Colors.black,
+  Colors.indigo,
   Colors.blue,
   Colors.cyan,
+  Colors.teal,
   Colors.green,
   Colors.yellow,
+  Colors.amber,
   Colors.orange,
   Colors.red,
+  Colors.pink,
+  Colors.white,
 ];
 
 /// A custom painter for rendering a waterfall display using the provided samples.

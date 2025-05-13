@@ -81,7 +81,7 @@ class KiwiSdr {
   double ceilDb = -10.0;
 
   /// The value used to clamp the waterfall dB values.
-  double floorDb = 40.0;
+  double floorDb = 70.0;
 
   KiwiSdr._({
     required int versionMajor,
