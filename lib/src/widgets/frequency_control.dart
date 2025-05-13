@@ -31,14 +31,19 @@ class _FrequencyControl extends State<FrequencyControl> {
 
   @override
   Widget build(BuildContext context) => Positioned.fill(
-    child: LayoutBuilder(
-      builder: _builder
+    child: ListenableBuilder(
+      listenable: widget.sdr, 
+      builder: _listenableBuilder
     ),
   );
 
-  Widget _builder(BuildContext context, BoxConstraints constraints) {
-    final minFreq = widget.sdr.centerFrequency! - widget.sdr.maxFrequency! / 2;
-    final maxFreq = widget.sdr.centerFrequency! + widget.sdr.maxFrequency! / 2;
+  Widget _listenableBuilder(BuildContext context, Widget? child) => LayoutBuilder(
+    builder: _layoutBuilder
+  );
+
+  Widget _layoutBuilder(BuildContext context, BoxConstraints constraints) {
+    final minFreq = (widget.sdr.centerFrequency ?? 15e6) - (widget.sdr.maxFrequency ?? 30e6) / 2;
+    final maxFreq = (widget.sdr.centerFrequency ?? 15e6) + (widget.sdr.maxFrequency ?? 30e6) / 2;
 
     final double width = constraints.maxWidth;
     final double positionX = ((_frequency - minFreq) / (maxFreq - minFreq)) * width;
