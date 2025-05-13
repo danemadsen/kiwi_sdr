@@ -15,7 +15,8 @@ class FrequencyScaleBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _FrequencyScalePainter(
-        maxFrequencyHz: sdr.maxFrequency!,
+        centerFrequencyHz: sdr.centerFrequency!,
+        maxSpanHz: sdr.maxFrequency!,
       ),
       size: const Size(double.infinity, 40),
     );
@@ -23,9 +24,13 @@ class FrequencyScaleBar extends StatelessWidget {
 }
 
 class _FrequencyScalePainter extends CustomPainter {
-  final double maxFrequencyHz;
+  final double centerFrequencyHz;
+  final double maxSpanHz;
 
-  _FrequencyScalePainter({required this.maxFrequencyHz});
+  _FrequencyScalePainter({
+    required this.centerFrequencyHz,
+    required this.maxSpanHz,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -36,22 +41,31 @@ class _FrequencyScalePainter extends CustomPainter {
     final double height = size.height;
     final double width = size.width;
 
-    // Draw background (light gradient for contrast)
+    // Gradient background
     final gradient = ui.Gradient.linear(
       const Offset(0, 0),
       Offset(0, height),
       [Colors.black, Colors.grey.shade800],
     );
     canvas.drawRect(
-        Rect.fromLTWH(0, 0, width, height),
-        Paint()..shader = gradient,
+      Rect.fromLTWH(0, 0, width, height),
+      Paint()..shader = gradient,
     );
 
-    final tickSpacing = width / (maxFrequencyHz / 1e6); // 1 MHz per small tick
+    final minHz = centerFrequencyHz - (maxSpanHz / 2);
+    final maxHz = centerFrequencyHz + (maxSpanHz / 2);
+    final totalRangeHz = maxHz - minHz;
 
-    for (double mhz = 0; mhz <= maxFrequencyHz / 1e6; mhz++) {
-      final x = mhz * tickSpacing;
-      final isMajor = mhz % 5 == 0;
+    // 1 MHz spacing
+    final double mhzStep = 1e6;
+    final double majorStep = 5e6;
+
+    // First tick >= minHz aligned to MHz step
+    double firstTickHz = (minHz / mhzStep).ceil() * mhzStep;
+
+    for (double freqHz = firstTickHz; freqHz <= maxHz; freqHz += mhzStep) {
+      final x = ((freqHz - minHz) / totalRangeHz) * width;
+      final isMajor = freqHz % majorStep == 0;
 
       final tickHeight = isMajor ? height * 0.6 : height * 0.3;
       canvas.drawLine(
@@ -61,11 +75,15 @@ class _FrequencyScalePainter extends CustomPainter {
       );
 
       if (isMajor) {
-        final label = mhz >= 1 ? '${mhz.toInt()} MHz' : '${(mhz * 1000).toInt()} kHz';
+        final labelText = freqHz >= 1e6
+            ? '${(freqHz / 1e6).toStringAsFixed(0)} MHz'
+            : '${(freqHz / 1e3).toStringAsFixed(0)} kHz';
+
         final textSpan = TextSpan(
-          text: label,
+          text: labelText,
           style: const TextStyle(color: Colors.white, fontSize: 12),
         );
+
         final tp = TextPainter(
           text: textSpan,
           textAlign: TextAlign.center,
