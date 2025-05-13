@@ -2,6 +2,7 @@ part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 const List<Color> _waterfallColors = [
   Colors.black,
+  Colors.deepPurple,
   Colors.indigo,
   Colors.blue,
   Colors.cyan,
@@ -10,6 +11,7 @@ const List<Color> _waterfallColors = [
   Colors.yellow,
   Colors.amber,
   Colors.orange,
+  Colors.deepOrange,
   Colors.red,
   Colors.pink,
   Colors.white,
