@@ -56,18 +56,17 @@ class _FrequencyScalePainter extends CustomPainter {
     final maxHz = centerFrequencyHz + (maxSpanHz / 2);
     final totalRangeHz = maxHz - minHz;
 
-    // 1 MHz spacing
-    final double mhzStep = 1e6;
-    final double majorStep = 5e6;
+    const double mhzStep = 1e6;
+    const double majorStep = 5e6;
 
-    // First tick >= minHz aligned to MHz step
-    double firstTickHz = (minHz / mhzStep).ceil() * mhzStep;
+    final double firstTickHz = (minHz / mhzStep).ceil() * mhzStep;
+    final double lastTickHz = (maxHz / mhzStep).floor() * mhzStep;
 
-    for (double freqHz = firstTickHz; freqHz <= maxHz; freqHz += mhzStep) {
-      final x = ((freqHz - minHz) / totalRangeHz) * width;
-      final isMajor = freqHz % majorStep == 0;
+    for (double freqHz = firstTickHz; freqHz <= lastTickHz; freqHz += mhzStep) {
+      final double x = ((freqHz - minHz) / totalRangeHz) * width;
+      final bool isMajor = freqHz % majorStep == 0;
 
-      final tickHeight = isMajor ? height * 0.6 : height * 0.3;
+      final double tickHeight = isMajor ? height * 0.6 : height * 0.3;
       canvas.drawLine(
         Offset(x, height - tickHeight),
         Offset(x, height),
@@ -77,7 +76,9 @@ class _FrequencyScalePainter extends CustomPainter {
       if (isMajor) {
         final labelText = freqHz >= 1e6
             ? '${(freqHz / 1e6).toStringAsFixed(0)} MHz'
-            : '${(freqHz / 1e3).toStringAsFixed(0)} kHz';
+            : freqHz >= 1e3
+            ? '${(freqHz / 1e3).toStringAsFixed(0)} kHz'
+            : '${freqHz.toStringAsFixed(0)} Hz';
 
         final textSpan = TextSpan(
           text: labelText,
@@ -86,11 +87,24 @@ class _FrequencyScalePainter extends CustomPainter {
 
         final tp = TextPainter(
           text: textSpan,
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.left,
           textDirection: TextDirection.ltr,
         );
         tp.layout();
-        tp.paint(canvas, Offset(x - tp.width / 2, height - tickHeight - 15));
+
+        Offset labelOffset;
+        if ((freqHz - firstTickHz).abs() < 1e-6) {
+          // First label: shift right
+          labelOffset = Offset(x + 2, height - tickHeight - 15);
+        } else if ((freqHz - lastTickHz).abs() < 1e-6) {
+          // Last label: shift left
+          labelOffset = Offset(x - tp.width - 2, height - tickHeight - 15);
+        } else {
+          // Centered for all others
+          labelOffset = Offset(x - tp.width / 2, height - tickHeight - 15);
+        }
+
+        tp.paint(canvas, labelOffset);
       }
     }
   }
