@@ -67,21 +67,21 @@ class KiwiSdr {
   /// A stream of waterfall data.
   Stream<Float32List> get waterfallStream => _streamController.stream;
 
-  double _minDb = -110.0;
+  int? _minDb;
 
   /// The minimum dB value for the waterfall.
-  double get minDb => _minDb;
+  int? get minDb => _minDb;
 
-  double _maxDb = -10.0;
+  int? _maxDb;
 
   /// The maximum dB value for the waterfall.
-  double get maxDb => _maxDb;
+  int? get maxDb => _maxDb;
 
   /// The value used to clamp the waterfall dB values.
-  double ceilDb = 0.0;
+  double ceilDb = -10.0;
 
   /// The value used to clamp the waterfall dB values.
-  double floorDb = 0.0;
+  double floorDb = 40.0;
 
   KiwiSdr._({
     required int versionMajor,
@@ -300,6 +300,7 @@ class KiwiSdr {
     setMaxDbMinDb(-10, -110);
     setWaterfallSpeed(4);
     setWaterfallInterp(13);
+    print('Waterfall params set');
   }
 
   /// Convert dB value to byte value.
@@ -396,7 +397,7 @@ class KiwiSdr {
   }
 
   /// Set the maximum and minimum dB values for the waterfall.
-  void setMaxDbMinDb(double maxDb, double minDb) {
+  void setMaxDbMinDb(int maxDb, int minDb) {
     _maxDb = maxDb;
     _minDb = minDb;
 
