@@ -67,6 +67,22 @@ class KiwiSdr {
   /// A stream of waterfall data.
   Stream<Float32List> get waterfallStream => _streamController.stream;
 
+  double? _minDb;
+
+  /// The minimum dB value for the waterfall.
+  double? get minDb => _minDb;
+
+  double? _maxDb;
+
+  /// The maximum dB value for the waterfall.
+  double? get maxDb => _maxDb;
+
+  /// The value used to clamp the waterfall dB values.
+  double ceilDb = 0.0;
+
+  /// The value used to clamp the waterfall dB values.
+  double floorDb = 0.0;
+
   KiwiSdr._({
     required int versionMajor,
     required int versionMinor,
@@ -241,11 +257,12 @@ class KiwiSdr {
     // Skip header (14 bytes)
     final waterfallData = data.sublist(14);
 
-    final min = waterfallData.reduce((a, b) => a < b ? a : b);
-    final max = waterfallData.reduce((a, b) => a > b ? a : b);
+    final min = dbToByte(_minDb! + floorDb);
+    final max = dbToByte(_maxDb! + ceilDb);
     final range = (max - min)
         .toDouble()
         .clamp(1.0, double.infinity); // Avoid div by 0
+    print('min: $min, max: $max, range: $range');
     final Float32List output = Float32List(waterfallData.length);
 
     for (int i = 0; i < waterfallData.length; i++) {
@@ -281,6 +298,24 @@ class KiwiSdr {
     setMaxDbMinDb(-10, -110);
     setWaterfallSpeed(4);
     setWaterfallInterp(13);
+  }
+
+  /// Convert dB value to byte value.
+  int dbToByte(double db) {
+    if (_maxDb == null || _minDb == null) {
+      throw KiwiSdrException('Max and min dB values are not set');
+    }
+
+    return ((db - _minDb!) / (_maxDb! - _minDb!) * 255).round();
+  }
+
+  /// Convert byte value to dB value.
+  double byteToDb(int byte) {
+    if (_maxDb == null || _minDb == null) {
+      throw KiwiSdrException('Max and min dB values are not set');
+    }
+
+    return byte / 255 * (_maxDb! - _minDb!) + _minDb!;
   }
 
   /// Set the AGC (Automatic Gain Control) parameters.
@@ -359,8 +394,16 @@ class KiwiSdr {
   }
 
   /// Set the maximum and minimum dB values for the waterfall.
-  void setMaxDbMinDb(int maxDb, int minDb) =>
-      _waterfallSocket.sink.add('SET maxdb=$maxDb mindb=$minDb');
+  void setMaxDbMinDb(double maxDb, double minDb) {
+    _maxDb = maxDb;
+    _minDb = minDb;
+
+    if (_maxDb! < _minDb!) {
+      throw KiwiSdrException('Invalid dB range: $_maxDb < $_minDb');
+    }
+
+    _waterfallSocket.sink.add('SET maxdb=$maxDb mindb=$minDb');
+  }
 
   /// Set the speed of the waterfall.
   void setWaterfallSpeed(int speed) {
