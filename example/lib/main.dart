@@ -50,7 +50,20 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Waterfall(sdr: _connection!);
+    return Stack(
+      children: [
+        Column(
+          children: [
+            FrequencyScaleBar(sdr: _connection!),
+            CustomPaint(
+              painter: WaterfallPainter(sdr: _connection!),
+              size: const Size(double.infinity, 300),
+            ),
+          ]
+        ),
+        FrequencyControl(sdr: _connection!),
+      ],
+    );
   }
 
   @override

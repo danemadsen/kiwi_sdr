@@ -16,6 +16,6 @@ part 'src/kiwi_sdr/kiwi_sdr_exception.dart';
 part 'src/utilities/ima_adpcm_decoder.dart';
 part 'src/widgets/frequency_scale_bar.dart';
 part 'src/widgets/waterfall_painter.dart';
-part 'src/widgets/waterfall.dart';
+part 'src/widgets/frequency_control.dart';
 part 'src/kiwi_sdr/kiwi_sdr.dart';
 part 'src/utilities/create_wav_file.dart';
