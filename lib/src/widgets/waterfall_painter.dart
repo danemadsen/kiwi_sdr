@@ -17,15 +17,16 @@ const List<Color> _waterfallColors = [
 
 /// A custom painter for rendering a waterfall display using the provided samples.
 class WaterfallPainter extends ChangeNotifier implements CustomPainter {
-  final KiwiSdr _sdr;
+  /// The KiwiSdr instance used to fetch waterfall samples.
+  final KiwiSdr sdr;
   Float32List? _samplesBuffer;
 
   ui.Image? _imageBuffer;
   Size _lastSize = Size.zero;
 
   /// Creates a [WaterfallPainter] instance with the given [sdr].
-  WaterfallPainter(this._sdr) {
-    _sdr.waterfallStream.listen((samples) {
+  WaterfallPainter({required this.sdr}) {
+    sdr.waterfallStream.listen((samples) {
       _samplesBuffer = samples;
 
       if (_lastSize != Size.zero) {

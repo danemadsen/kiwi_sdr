@@ -49,9 +49,14 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return CustomPaint(
-      painter: WaterfallPainter(_connection!),
-      size: Size.infinite,
+    return Column(
+      children: [
+        FrequencyScaleBar(sdr: _connection!),
+        Flexible(child: CustomPaint(
+          painter: WaterfallPainter(sdr: _connection!),
+          size: Size.infinite,
+        ))
+      ]
     );
   }
 
