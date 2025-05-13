@@ -67,15 +67,15 @@ class KiwiSdr {
   /// A stream of waterfall data.
   Stream<Float32List> get waterfallStream => _streamController.stream;
 
-  double? _minDb;
+  double _minDb = -110.0;
 
   /// The minimum dB value for the waterfall.
-  double? get minDb => _minDb;
+  double get minDb => _minDb;
 
-  double? _maxDb;
+  double _maxDb = -10.0;
 
   /// The maximum dB value for the waterfall.
-  double? get maxDb => _maxDb;
+  double get maxDb => _maxDb;
 
   /// The value used to clamp the waterfall dB values.
   double ceilDb = 0.0;
@@ -257,6 +257,8 @@ class KiwiSdr {
     // Skip header (14 bytes)
     final waterfallData = data.sublist(14);
 
+    print('minDb: $_minDb, maxDb: $_maxDb, floorDb: $floorDb, ceilDb: $ceilDb');
+
     final min = dbToByte(_minDb! + floorDb);
     final max = dbToByte(_maxDb! + ceilDb);
     final range = (max - min)
@@ -397,10 +399,6 @@ class KiwiSdr {
   void setMaxDbMinDb(double maxDb, double minDb) {
     _maxDb = maxDb;
     _minDb = minDb;
-
-    if (_maxDb! < _minDb!) {
-      throw KiwiSdrException('Invalid dB range: $_maxDb < $_minDb');
-    }
 
     _waterfallSocket.sink.add('SET maxdb=$maxDb mindb=$minDb');
   }
