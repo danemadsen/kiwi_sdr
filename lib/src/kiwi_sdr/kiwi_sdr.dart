@@ -67,6 +67,11 @@ class KiwiSdr extends ChangeNotifier {
   /// A stream of waterfall data.
   Stream<Float32List> get waterfallStream => _streamController.stream;
 
+  int? _waterfallSpeed;
+
+  /// The speed of the waterfall.
+  int? get waterfallSpeed => _waterfallSpeed;
+
   int? _minDb;
 
   /// The minimum dB value for the waterfall.
@@ -408,9 +413,11 @@ class KiwiSdr extends ChangeNotifier {
 
   /// Set the speed of the waterfall.
   void setWaterfallSpeed(int speed) {
-    speed = max(1, min(4, speed)); // clamp to 1-4
+    _waterfallSpeed = max(1, min(4, speed)); // clamp to 1-4
 
-    _waterfallSocket.sink.add('SET wf_speed=$speed');
+    _waterfallSocket.sink.add('SET wf_speed=$_waterfallSpeed');
+
+    notifyListeners();
   }
 
   /// Set the interpolation method for the waterfall.
