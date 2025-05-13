@@ -12,15 +12,18 @@ class FrequencyScaleBar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _FrequencyScalePainter(
-        centerFrequencyHz: sdr.centerFrequency!,
-        maxSpanHz: sdr.maxFrequency!,
-      ),
-      size: const Size(double.infinity, 40),
-    );
-  }
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: sdr, 
+    builder: _builder
+  );
+
+  Widget _builder(BuildContext context, Widget? child) => CustomPaint(
+    painter: _FrequencyScalePainter(
+      centerFrequencyHz: sdr.centerFrequency ?? 15e6,
+      maxSpanHz: sdr.maxFrequency ?? 30e6,
+    ),
+    size: const Size(double.infinity, 40),
+  );
 }
 
 class _FrequencyScalePainter extends CustomPainter {

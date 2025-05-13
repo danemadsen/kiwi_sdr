@@ -1,7 +1,7 @@
 part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 /// A class representing a connection to a KiwiSDR server.
-class KiwiSdr {
+class KiwiSdr extends ChangeNotifier {
   final StreamController<Float32List> _streamController =
       StreamController.broadcast();
   final _ImaAdpcmDecoder _decoder = _ImaAdpcmDecoder();
@@ -226,6 +226,8 @@ class KiwiSdr {
       case 'down':
         throw KiwiSdrException('KiwiSDR is down');
     }
+
+    notifyListeners();
   }
 
   void _processSoundData(Uint8List data) async {
@@ -257,14 +259,11 @@ class KiwiSdr {
     // Skip header (14 bytes)
     final waterfallData = data.sublist(14);
 
-    print('minDb: $_minDb, maxDb: $_maxDb, floorDb: $floorDb, ceilDb: $ceilDb');
-
     final min = dbToByte(_minDb! + floorDb);
     final max = dbToByte(_maxDb! + ceilDb);
     final range = (max - min)
         .toDouble()
         .clamp(1.0, double.infinity); // Avoid div by 0
-    print('min: $min, max: $max, range: $range');
     final Float32List output = Float32List(waterfallData.length);
 
     for (int i = 0; i < waterfallData.length; i++) {
@@ -300,7 +299,6 @@ class KiwiSdr {
     setMaxDbMinDb(-10, -110);
     setWaterfallSpeed(4);
     setWaterfallInterp(13);
-    print('Waterfall params set');
   }
 
   /// Convert dB value to byte value.
@@ -377,6 +375,8 @@ class KiwiSdr {
 
     _soundSocket.sink.add(
         'SET mod=${mode.name} low_cut=$_lowCut high_cut=$_highCut freq=$freq');
+
+    notifyListeners();
   }
 
   /// Set the zoom level and center frequency for the waterfall.
@@ -402,6 +402,8 @@ class KiwiSdr {
     _minDb = minDb;
 
     _waterfallSocket.sink.add('SET maxdb=$maxDb mindb=$minDb');
+
+    notifyListeners();
   }
 
   /// Set the speed of the waterfall.
