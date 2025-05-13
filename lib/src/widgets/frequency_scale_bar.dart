@@ -15,7 +15,7 @@ class FrequencyScaleBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _FrequencyScalePainter(
-        maxFrequencyHz: sdr.maxFrequency?.toDouble() ?? 30000000,
+        maxFrequencyHz: sdr.maxFrequency!,
       ),
       size: const Size(double.infinity, 40),
     );
