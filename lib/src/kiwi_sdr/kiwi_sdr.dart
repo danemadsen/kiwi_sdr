@@ -72,6 +72,11 @@ class KiwiSdr extends ChangeNotifier {
   /// The speed of the waterfall.
   int? get waterfallSpeed => _waterfallSpeed;
 
+  int? _waterfallZoom;
+  
+  /// The zoom level of the waterfall.
+  int? get waterfallZoom => _waterfallZoom;
+
   int? _minDb;
 
   /// The minimum dB value for the waterfall.
@@ -264,6 +269,8 @@ class KiwiSdr extends ChangeNotifier {
     // Skip header (14 bytes)
     final waterfallData = data.sublist(14);
 
+    print('Waterfall data length: ${waterfallData.length}');
+
     final min = dbToByte(_minDb! + floorDb);
     final max = dbToByte(_maxDb! + ceilDb);
     final range = (max - min)
@@ -386,10 +393,14 @@ class KiwiSdr extends ChangeNotifier {
 
   /// Set the zoom level and center frequency for the waterfall.
   void setZoomCf(int zoom, double cfkHz) {
+    if (zoom < 0 || zoom > (_maxZoom ?? 14)) {
+      throw KiwiSdrException('Invalid zoom level: $zoom');
+    }
+    
+    _waterfallZoom = zoom;
+
     if (version > 1.329) {
       _waterfallSocket.sink.add('SET zoom=$zoom cf=$cfkHz');
-    } else if (zoom <= 0 || zoom > (_maxZoom ?? 14)) {
-      throw KiwiSdrException('Invalid zoom level: $zoom');
     } else {
       final startFrequency = cfkHz - (_maxFrequency! / pow(2, zoom)) / 2;
       final counter = (startFrequency /
