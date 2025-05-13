@@ -55,10 +55,12 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
         Column(
           children: [
             FrequencyScaleBar(sdr: _connection!),
-            CustomPaint(
-              painter: WaterfallPainter(sdr: _connection!),
-              size: const Size(double.infinity, 300),
-            ),
+            Flexible(
+              child: CustomPaint(
+                painter: WaterfallPainter(sdr: _connection!),
+                size: Size.infinite
+              )
+            )
           ]
         ),
         FrequencyControl(sdr: _connection!),
