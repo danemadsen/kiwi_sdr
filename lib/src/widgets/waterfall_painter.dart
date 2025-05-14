@@ -1,7 +1,6 @@
 part of 'package:kiwi_sdr/kiwi_sdr.dart';
 
 const List<Color> _waterfallColors = [
-  Colors.black,
   Colors.deepPurple,
   Colors.indigo,
   Colors.blue,
@@ -13,8 +12,6 @@ const List<Color> _waterfallColors = [
   Colors.orange,
   Colors.deepOrange,
   Colors.red,
-  Colors.pink,
-  Colors.white,
 ];
 
 /// A custom painter for rendering a waterfall display using the provided samples.
@@ -24,6 +21,7 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
   Float32List? _samplesBuffer;
 
   ui.Image? _imageBuffer;
+  ui.Image? _gradientImage;
   Size _lastSize = Size.zero;
 
   /// Creates a [WaterfallPainter] instance with the given [sdr].
@@ -35,43 +33,90 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
         _updateImageBuffer(_lastSize);
       }
 
-      notifyListeners(); // triggers CustomPaint to repaint
+      notifyListeners();
     });
+
+    _generateGradientImage();
+  }
+
+  Future<void> _generateGradientImage() async {
+    const gradientHeight = 256.0;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Gradient layout:
+    // - 0.0 → 0.3: Black
+    // - 0.3 → 0.8: Remaining spectrum
+    // - 0.8 → 1.0: Pink
+
+    final gradient = ui.Gradient.linear(
+      const Offset(0, 0),
+      const Offset(0, gradientHeight),
+      [
+        Colors.black,
+        Colors.black,
+        ..._waterfallColors,
+        Colors.pink,
+        Colors.pink,
+      ],
+      [
+        0.0,
+        0.3,
+        ...List.generate(
+          _waterfallColors.length,
+          (i) => 0.3 + (i / (_waterfallColors.length - 1)) * 0.5,
+        ),
+        0.8,
+        1.0,
+      ],
+    );
+
+    final paint = Paint()..shader = gradient;
+    canvas.drawRect(Rect.fromLTWH(0, 0, 1, gradientHeight), paint);
+    final picture = recorder.endRecording();
+    _gradientImage = await picture.toImage(1, gradientHeight.toInt());
   }
 
   void _updateImageBuffer(Size size) async {
-    if (_samplesBuffer == null) return;
+    if (_samplesBuffer == null || _gradientImage == null) return;
 
     final width = size.width;
     final height = size.height;
     _lastSize = size;
 
     final pixelSize = width / _samplesBuffer!.length;
-
-    // Shift previous image content up
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
-    // Draw existing image if present
     if (_imageBuffer != null) {
-      final src = Rect.fromLTWH(0, 0, width, height - 1);
-      final dst = Rect.fromLTWH(0, 1, width, height - 1);
+      final src = Rect.fromLTWH(0, 0, width, height - pixelSize);
+      final dst = Rect.fromLTWH(0, pixelSize, width, height - pixelSize);
       canvas.drawImageRect(_imageBuffer!, src, dst, Paint());
     }
 
-    // Draw new samples row at the bottom
+    final gradientPixels = await _gradientImage!.toByteData(format: ui.ImageByteFormat.rawRgba);
     for (int x = 0; x < _samplesBuffer!.length; x++) {
-      final color = _getWaterfallColor(_samplesBuffer![x]);
+      final color = _getWaterfallColor(_samplesBuffer![x], gradientPixels!);
       final paint = Paint()..color = color;
 
       canvas.drawRect(
-        Rect.fromLTWH(x * pixelSize, 0, pixelSize, 1),
+        Rect.fromLTWH(x * pixelSize, 0, pixelSize, pixelSize),
         paint,
       );
     }
 
     final picture = recorder.endRecording();
     _imageBuffer = await picture.toImage(width.toInt(), height.toInt());
+  }
+
+  Color _getWaterfallColor(double value, ByteData gradientPixels) {
+    final clamped = (value.clamp(0.0, 1.0) * 255).round();
+    final offset = clamped * 4;
+    final r = gradientPixels.getUint8(offset);
+    final g = gradientPixels.getUint8(offset + 1);
+    final b = gradientPixels.getUint8(offset + 2);
+    final a = gradientPixels.getUint8(offset + 3);
+    return Color.fromARGB(a, r, g, b);
   }
 
   @override
@@ -82,21 +127,6 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
     }
 
     canvas.drawImage(_imageBuffer!, Offset.zero, Paint());
-  }
-
-  Color _getWaterfallColor(double value) {
-    // Clamp and normalize to [0.0, 1.0]
-    final clamped = value.clamp(0.0, 1.0);
-
-    final step = 1.0 / (_waterfallColors.length - 1);
-    final idx = (clamped / step).floor();
-    if (idx >= _waterfallColors.length - 1) return _waterfallColors.last;
-
-    final startColor = _waterfallColors[idx];
-    final endColor = _waterfallColors[idx + 1];
-    final localValue = (clamped - (step * idx)) / step;
-
-    return Color.lerp(startColor, endColor, localValue)!;
   }
 
   @override
