@@ -39,40 +39,36 @@ class WaterfallPainter extends ChangeNotifier implements CustomPainter {
     _generateGradientImage();
   }
 
+  /// Generates a gradient for the waterfall display.
+  static ui.Gradient get gradient => ui.Gradient.linear(
+    const Offset(0, 0),
+    const Offset(0, 256),
+    [
+      Colors.black,
+      Colors.black,
+      ..._waterfallColors,
+      Colors.pink,
+      Colors.pink,
+    ],
+    [
+      0.0,
+      0.3,
+      ...List.generate(
+        _waterfallColors.length,
+        (i) => 0.3 + (i / (_waterfallColors.length - 1)) * 0.5,
+      ),
+      0.8,
+      1.0,
+    ],
+  );
+
   Future<void> _generateGradientImage() async {
     const gradientHeight = 256.0;
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
-    // Gradient layout:
-    // - 0.0 → 0.3: Black
-    // - 0.3 → 0.8: Remaining spectrum
-    // - 0.8 → 1.0: Pink
-
-    final gradient = ui.Gradient.linear(
-      const Offset(0, 0),
-      const Offset(0, gradientHeight),
-      [
-        Colors.black,
-        Colors.black,
-        ..._waterfallColors,
-        Colors.pink,
-        Colors.pink,
-      ],
-      [
-        0.0,
-        0.3,
-        ...List.generate(
-          _waterfallColors.length,
-          (i) => 0.3 + (i / (_waterfallColors.length - 1)) * 0.5,
-        ),
-        0.8,
-        1.0,
-      ],
-    );
-
     final paint = Paint()..shader = gradient;
-    canvas.drawRect(Rect.fromLTWH(0, 0, 1, gradientHeight), paint);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 1, gradientHeight), paint);
     final picture = recorder.endRecording();
     _gradientImage = await picture.toImage(1, gradientHeight.toInt());
   }
