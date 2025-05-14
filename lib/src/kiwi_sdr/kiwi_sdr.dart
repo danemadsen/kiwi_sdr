@@ -262,11 +262,17 @@ class KiwiSdr extends ChangeNotifier {
 
     // Skip header (14 bytes)
     final waterfallData = data.sublist(14);
+    
+    final sorted = Uint8List.fromList(waterfallData);
+    sorted.sort();
+    final min = sorted.first;
+    final max = sorted.last;
+    final range = max - min;
 
     final Float32List output = Float32List(waterfallData.length);
 
     for (int i = 0; i < waterfallData.length; i++) {
-      final normalized = (waterfallData[i] - 180) / 50;
+      final normalized = (waterfallData[i] - min) / range;
       output[i] = normalized.clamp(0.0, 1.0);
     }
     
