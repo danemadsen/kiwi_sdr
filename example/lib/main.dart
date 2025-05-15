@@ -40,7 +40,7 @@ class _WaterfallWidgetState extends State<WaterfallWidget> {
   }
 
   Future<void> establishConnection() async {
-    _connection = await KiwiSdr.connect('http://22274.proxy.kiwisdr.com:8073/');
+    _connection = await KiwiSdr.connect('http://vk4een.proxy.kiwisdr.com:8073/');
     setState(() {});
   }
 

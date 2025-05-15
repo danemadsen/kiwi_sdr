@@ -306,24 +306,6 @@ class KiwiSdr extends ChangeNotifier {
     setWaterfallInterp(13);
   }
 
-  /// Convert dB value to byte value.
-  int dbToByte(num db) {
-    if (_maxDb == null || _minDb == null) {
-      throw KiwiSdrException('Max and min dB values are not set');
-    }
-
-    return ((db - _minDb!) / (_maxDb! - _minDb!) * 255).round();
-  }
-
-  /// Convert byte value to dB value.
-  double byteToDb(int byte) {
-    if (_maxDb == null || _minDb == null) {
-      throw KiwiSdrException('Max and min dB values are not set');
-    }
-
-    return byte / 255 * (_maxDb! - _minDb!) + _minDb!;
-  }
-
   /// Set the AGC (Automatic Gain Control) parameters.
   void setAutomaticGainControl(
           int on, int hang, int threshold, int slope, int decay, int gain) =>
